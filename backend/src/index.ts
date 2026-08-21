@@ -2,8 +2,8 @@ import "dotenv/config";
 import { createServer } from "node:http";
 import { expressApplication } from "./app/app.js";
 
-(function main() {
-  const nodeServer = createServer(expressApplication());
+(async function main() {
+  const nodeServer = createServer(await expressApplication());
 
   const PORT = process.env.PORT ?? 8000;
 
