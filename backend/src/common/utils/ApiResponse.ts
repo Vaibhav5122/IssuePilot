@@ -1,6 +1,6 @@
 import type { Response } from "express";
 
-export interface ApiErrResponse<T = any> {
+export interface ApiResponseBody<T = any> {
   success: boolean;
   message: string;
   data: T | null;

@@ -19,6 +19,9 @@ export class ApiError extends Error {
   static unauthorized(message: string = "Unauthorized"): ApiError {
     return new ApiError(401, message);
   }
+  static emailExists(message: string = "Email Already Exists"): ApiError {
+    return new ApiError(409, message);
+  }
   static serverError(message: string = "Internal Server Error"): ApiError {
     return new ApiError(500, message);
   }
