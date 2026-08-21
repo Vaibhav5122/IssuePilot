@@ -13,6 +13,7 @@ import { envZod } from "./app/utils/envSanitizations.js";
       console.log(`Server starts in PORT ${PORT}`);
     });
   } catch (error) {
-    throw error;
+    console.error("Server failed to start", error);
+    process.exit(1);
   }
 })();

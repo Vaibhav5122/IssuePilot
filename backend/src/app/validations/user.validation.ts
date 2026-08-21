@@ -27,7 +27,6 @@ export const registerUserSchema = z.object({
           ? "Password is required"
           : "Invalid text format",
     })
-    .trim()
     .min(6, "Password to short")
     .max(66, "Password too long")
     .regex(

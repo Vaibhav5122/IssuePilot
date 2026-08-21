@@ -16,6 +16,8 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      required: true,
+      select: false,
     },
   },
   { timestamps: true },
@@ -28,12 +30,12 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-userSchema.methods.comparePassword = async function (
-  candidatePassword: string,
-) {
-  if (!this.password) return;
-  return await bcrypt.compare(candidatePassword, this.password);
-};
+// userSchema.methods.comparePassword = async function (
+//   candidatePassword: string,
+// ) {
+//   if (!this.password) return;
+//   return await bcrypt.compare(candidatePassword, this.password);
+// };
 
 export type IUser = InferSchemaType<typeof userSchema>;
 
