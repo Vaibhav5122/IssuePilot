@@ -1,7 +1,8 @@
 import express, { type Application } from "express";
 import { connectDB } from "./configs/db.config.js";
-import { globalErrorHandler } from "../utils/GlobalErrorHandler.js";
-import { ApiError } from "../utils/ApiError.js";
+import { globalErrorHandler } from "../common/utils/GlobalErrorHandler.js";
+import { ApiError } from "../common/utils/ApiError.js";
+import { userRouter } from "./routes/user.route.js";
 
 export async function expressApplication(): Promise<Application> {
   const expressApp = express();
@@ -9,6 +10,7 @@ export async function expressApplication(): Promise<Application> {
   await connectDB();
 
   expressApp.use(express.json());
+  expressApp.use("/api/v1/auth", userRouter);
 
   expressApp.get("/health", (req, res) => {
     return res
