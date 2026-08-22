@@ -1,7 +1,5 @@
 import type { Request, Response } from "express";
 import {
-  loginUserSchema,
-  registerUserSchema,
   type LoginUserSchema,
   type RegisterUserSchemaType,
 } from "../validations/user.validation.js";
