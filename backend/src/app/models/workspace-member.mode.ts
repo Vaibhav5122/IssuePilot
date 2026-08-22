@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { type InferSchemaType } from "mongoose";
 
 const workspaceMembersSchema = new mongoose.Schema(
   {
@@ -15,7 +15,7 @@ const workspaceMembersSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["ADMIN", "MEMBER"],
-      default: "Member",
+      default: "MEMBER",
       required: true,
     },
   },
@@ -23,6 +23,8 @@ const workspaceMembersSchema = new mongoose.Schema(
 );
 
 workspaceMembersSchema.index({ workspace: 1, user: 1 }, { unique: true });
+
+export type IWorkspaceMember = InferSchemaType<typeof workspaceMembersSchema>;
 
 export const WorkspaceMember = mongoose.model(
   "WorkspaceMember",

@@ -31,3 +31,6 @@ export const workspaceMembersSchema = z.object({
 
 export type WorkSpaceSchema = z.infer<typeof worksSpaceSchema>;
 export type WorkspaceMembersSchema = z.infer<typeof workspaceMembersSchema>;
+
+export const addWorkspaceMember = workspaceMembersSchema.pick({ email: true });
+export type AddWorkspaceMember = z.infer<typeof addWorkspaceMember>;
