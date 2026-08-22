@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type {
   AddWorkspaceMember,
+  AddWorkspaceMemberRole,
   WorkspaceMembersSchema,
   WorkSpaceSchema,
 } from "../validations/workspace.validation.js";
@@ -137,5 +138,40 @@ export class WorkspaceController {
     return ApiResponse.created(res, "User added in workspace", registerUser);
   }
 
-  public async handlePatchChangeMemberRole(req: Request, res: Response) {}
+  public async handlePatchChangeMemberRole(
+    req: Request<{}, {}, AddWorkspaceMemberRole>,
+    res: Response,
+  ) {
+    const { role } = req.body;
+
+    const { memberId } = req.params;
+    console.log("memberr", memberId);
+
+    const membership = res.locals.membership;
+
+    console.log("membershup", membership.user.toString());
+    console.log("userrr", req.user?.id);
+
+    if (membership.user.toString() === req.user?.id) {
+      throw ApiError.forbidden(
+        "You cannot modify your own administrative role",
+      );
+    }
+
+    const updatedMembership = await WorkspaceMember.findOneAndUpdate(
+      { workspace: membership.workspace, user: membership.user },
+      { $set: { role } },
+      { new: true, runValidators: true },
+    );
+
+    // console.log(updatedMembership);
+
+    if (!updatedMembership) {
+      throw ApiError.badRequest("User not belong to workspace");
+    }
+
+    // console.log(updatedMembership);
+
+    return ApiResponse.ok(res, "Member role updated", updatedMembership);
+  }
 }
