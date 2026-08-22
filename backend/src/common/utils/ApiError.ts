@@ -39,4 +39,10 @@ export class ApiError extends Error {
 
     return new ApiError(400, combinedMessage || "Validation failed");
   }
+  static notFound(message: string = "Not Found"): ApiError {
+    return new ApiError(404, message);
+  }
+  static forbidden(message: string = "Forbidden"): ApiError {
+    return new ApiError(403, message);
+  }
 }
