@@ -34,3 +34,8 @@ export type WorkspaceMembersSchema = z.infer<typeof workspaceMembersSchema>;
 
 export const addWorkspaceMember = workspaceMembersSchema.pick({ email: true });
 export type AddWorkspaceMember = z.infer<typeof addWorkspaceMember>;
+
+export const addWorkspaceMemberRole = workspaceMembersSchema.pick({
+  role: true,
+});
+export type AddWorkspaceMemberRole = z.infer<typeof addWorkspaceMemberRole>;

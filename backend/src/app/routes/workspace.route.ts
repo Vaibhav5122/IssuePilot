@@ -3,6 +3,7 @@ import { WorkspaceController } from "../controllers/workspace.controller.js";
 import { restrictUserMiddleware } from "../middlewares/auth.middleware.js";
 import {
   addWorkspaceMember,
+  addWorkspaceMemberRole,
   workspaceMembersSchema,
   worksSpaceSchema,
 } from "../validations/workspace.validation.js";
@@ -46,3 +47,12 @@ workspaceRouter
     requireWorkspaceAdmin(),
     workspaceController.handlePostAddMember.bind(workspaceController),
   );
+
+workspaceRouter.patch(
+  "/:workspaceId/members/:memberId",
+  validateBody(addWorkspaceMemberRole),
+  restrictUserMiddleware(),
+  requireWorkspaceMember(),
+  requireWorkspaceAdmin(),
+  workspaceController.handlePatchChangeMemberRole.bind(workspaceController),
+);
