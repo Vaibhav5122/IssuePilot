@@ -5,13 +5,9 @@ import type {
   WorkspaceMembersSchema,
   WorkSpaceSchema,
 } from "../validations/workspace.validation.js";
-import type { TypeJWTPayload } from "../utils/jwtToken.js";
 import { Workspace } from "../models/workspace.model.js";
 import mongoose from "mongoose";
-import {
-  WorkspaceMember,
-  type IWorkspaceMember,
-} from "../models/workspace-member.model.js";
+import { WorkspaceMember } from "../models/workspace-member.model.js";
 import { ApiResponse } from "../../common/utils/ApiResponse.js";
 import { ApiError } from "../../common/utils/ApiError.js";
 import { User } from "../models/user.model.js";
@@ -146,12 +142,19 @@ export class WorkspaceController {
     const memberId = res.locals.memberId;
     const membership = res.locals.membership;
 
-    console.log(membership);
-
     if (memberId.user.toString() === req.user?.id) {
       throw ApiError.forbidden(
         "You cannot modify your own administrative role",
       );
+    }
+
+    const adminCount = await WorkspaceMember.countDocuments({
+      workspace: membership.workspace,
+      role: "ADMIN",
+    });
+
+    if (memberId.role === "ADMIN" && adminCount <= 1) {
+      throw ApiError.badRequest("A workspace must have at least one admin");
     }
 
     const updatedMembership = await WorkspaceMember.findOneAndUpdate(
@@ -159,7 +162,7 @@ export class WorkspaceController {
       { $set: { role } },
       { returnDocument: "after", runValidators: true },
     );
-    console.log("update meme", updatedMembership);
+
     if (!updatedMembership) {
       throw ApiError.badRequest("User not belong to workspace");
     }

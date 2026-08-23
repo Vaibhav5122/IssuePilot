@@ -24,7 +24,7 @@ export function requireWorkspaceMember() {
       // console.log(membership);
 
       if (!membership) {
-        return next(ApiError.forbidden("You are not member of this workspace"));
+        return next(ApiError.notFound("You are not member of this workspace"));
       }
 
       res.locals.workspace = workspace;
@@ -61,7 +61,7 @@ export function requireMemberId() {
       const { workspaceId } = req.params;
 
       if (!memberId || !workspaceId) {
-        return next(ApiError.notFound("Workspace member id not found"));
+        return next(ApiError.notFound("Workspace or member id not found"));
       }
 
       const membershipId = await WorkspaceMember.findOne({
@@ -70,7 +70,7 @@ export function requireMemberId() {
       });
 
       if (!membershipId) {
-        return next(ApiError.forbidden("You are not member of this workspace"));
+        return next(ApiError.notFound("You are not member of this workspace"));
       }
 
       res.locals.memberId = membershipId;
