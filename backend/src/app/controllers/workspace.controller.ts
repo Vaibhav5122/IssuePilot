@@ -11,7 +11,7 @@ import mongoose from "mongoose";
 import {
   WorkspaceMember,
   type IWorkspaceMember,
-} from "../models/workspace-member.mode.js";
+} from "../models/workspace-member.model.js";
 import { ApiResponse } from "../../common/utils/ApiResponse.js";
 import { ApiError } from "../../common/utils/ApiError.js";
 import { User } from "../models/user.model.js";
@@ -72,9 +72,7 @@ export class WorkspaceController {
       "workspace",
       "name description",
     );
-    if (!workspaces) {
-      throw ApiError.badRequest("No Workspaces found");
-    }
+
     const formattedResponse = workspaces.map((item: any) => {
       return {
         workspace: {
@@ -119,9 +117,10 @@ export class WorkspaceController {
     if (!isUser) {
       throw ApiError.notFound("User not found to add in workspace");
     }
-    const isExistingUser = await WorkspaceMember.findOne({ user: isUser.id });
-
-    console.log(isExistingUser);
+    const isExistingUser = await WorkspaceMember.findOne({
+      workspace: membership.workspace,
+      user: isUser.id,
+    });
 
     if (isExistingUser) {
       throw ApiError.emailExists("User already present in workspace");
@@ -144,34 +143,59 @@ export class WorkspaceController {
   ) {
     const { role } = req.body;
 
-    const { memberId } = req.params;
-    console.log("memberr", memberId);
-
+    const memberId = res.locals.memberId;
     const membership = res.locals.membership;
 
-    console.log("membershup", membership.user.toString());
-    console.log("userrr", req.user?.id);
+    console.log(membership);
 
-    if (membership.user.toString() === req.user?.id) {
+    if (memberId.user.toString() === req.user?.id) {
       throw ApiError.forbidden(
         "You cannot modify your own administrative role",
       );
     }
 
     const updatedMembership = await WorkspaceMember.findOneAndUpdate(
-      { workspace: membership.workspace, user: membership.user },
+      { workspace: membership.workspace, user: memberId.user },
       { $set: { role } },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     );
-
-    // console.log(updatedMembership);
-
+    console.log("update meme", updatedMembership);
     if (!updatedMembership) {
       throw ApiError.badRequest("User not belong to workspace");
     }
-
-    // console.log(updatedMembership);
-
     return ApiResponse.ok(res, "Member role updated", updatedMembership);
+  }
+  public async handleDeleteMember(req: Request, res: Response) {
+    const membership = res.locals.membership;
+    const userId = res.locals.memberId;
+
+    if (userId.user.toString() === req.user?.id) {
+      throw ApiError.forbidden(
+        "You cannot modify your own administrative role",
+      );
+    }
+
+    const adminCount = await WorkspaceMember.countDocuments({
+      workspace: membership.workspace,
+      role: "ADMIN",
+    });
+
+    if (userId.role === "ADMIN" && adminCount <= 1) {
+      throw ApiError.badRequest("A workspace must have at least one admin");
+    }
+
+    const deletedMember = await WorkspaceMember.findOneAndDelete({
+      workspace: membership.workspace,
+      user: userId.user,
+    });
+    if (!deletedMember) {
+      throw ApiError.notFound(
+        "The target user is not a member of this workspace",
+      );
+    }
+    return ApiResponse.ok(res, "Member removed from workspace successfully", {
+      workspaceId: deletedMember.workspace,
+      removedUserId: deletedMember.user,
+    });
   }
 }
