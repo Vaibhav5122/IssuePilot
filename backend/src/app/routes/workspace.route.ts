@@ -4,7 +4,6 @@ import { restrictUserMiddleware } from "../middlewares/auth.middleware.js";
 import {
   addWorkspaceMember,
   addWorkspaceMemberRole,
-  workspaceMembersSchema,
   worksSpaceSchema,
 } from "../validations/workspace.validation.js";
 import { validateBody } from "../middlewares/validate.middleware.js";
