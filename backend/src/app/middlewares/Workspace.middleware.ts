@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ApiError } from "../../common/utils/ApiError.js";
-import { WorkspaceMember } from "../models/workspace-member.mode.js";
+import { WorkspaceMember } from "../models/workspace-member.model.js";
 import { Workspace } from "../models/workspace.model.js";
 
 export function requireWorkspaceMember() {
@@ -32,7 +32,7 @@ export function requireWorkspaceMember() {
 
       next();
     } catch (error: any) {
-      return next(ApiError.unauthorized("Issue in workspace "));
+      return next(ApiError.forbidden("Issue in workspace"));
     }
   };
 }
@@ -50,6 +50,35 @@ export function requireWorkspaceAdmin() {
           "Admin have only permissions for any modifiications",
         ),
       );
+    }
+  };
+}
+
+export function requireMemberId() {
+  return async function (req: Request, res: Response, next: NextFunction) {
+    try {
+      const { memberId } = req.params;
+      const { workspaceId } = req.params;
+
+      if (!memberId || !workspaceId) {
+        return next(ApiError.notFound("Workspace member id not found"));
+      }
+
+      const membershipId = await WorkspaceMember.findOne({
+        user: memberId,
+        workspace: res.locals.workspace.id,
+      });
+
+      if (!membershipId) {
+        return next(ApiError.forbidden("You are not member of this workspace"));
+      }
+
+      res.locals.memberId = membershipId;
+      console.log("mmm", res.locals.memberId);
+
+      next();
+    } catch (error: any) {
+      return next(ApiError.unauthorized("Issue in workspace"));
     }
   };
 }

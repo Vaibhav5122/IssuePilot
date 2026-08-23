@@ -9,6 +9,7 @@ import {
 } from "../validations/workspace.validation.js";
 import { validateBody } from "../middlewares/validate.middleware.js";
 import {
+  requireMemberId,
   requireWorkspaceAdmin,
   requireWorkspaceMember,
 } from "../middlewares/Workspace.middleware.js";
@@ -41,18 +42,27 @@ workspaceRouter
     workspaceController.handleGetListMembers.bind(workspaceController),
   )
   .post(
-    validateBody(addWorkspaceMember),
     restrictUserMiddleware(),
+    validateBody(addWorkspaceMember),
     requireWorkspaceMember(),
     requireWorkspaceAdmin(),
     workspaceController.handlePostAddMember.bind(workspaceController),
   );
 
-workspaceRouter.patch(
-  "/:workspaceId/members/:memberId",
-  validateBody(addWorkspaceMemberRole),
-  restrictUserMiddleware(),
-  requireWorkspaceMember(),
-  requireWorkspaceAdmin(),
-  workspaceController.handlePatchChangeMemberRole.bind(workspaceController),
-);
+workspaceRouter
+  .route("/:workspaceId/members/:memberId")
+  .patch(
+    validateBody(addWorkspaceMemberRole),
+    restrictUserMiddleware(),
+    requireWorkspaceMember(),
+    requireWorkspaceAdmin(),
+    requireMemberId(),
+    workspaceController.handlePatchChangeMemberRole.bind(workspaceController),
+  )
+  .delete(
+    restrictUserMiddleware(),
+    requireWorkspaceMember(),
+    requireWorkspaceAdmin(),
+    requireMemberId(),
+    workspaceController.handleDeleteMember.bind(workspaceController),
+  );
