@@ -15,7 +15,7 @@ export class ProjectController {
     const { name, description } = req.body;
 
     if (!req.user || !req.user.id) {
-      throw ApiError.badRequest("User not found");
+      throw ApiError.unauthorized("User not found");
     }
 
     const workspaceId = res.locals.workspace.id;

@@ -21,17 +21,19 @@ export const createProjectSchema = z.object({
     })
     .max(500, "Project description too long")
     .optional(),
-  status: z
-    .enum(["ACTIVE", "ARCHIVED"], {
-      error: (issue) =>
-        issue.input === undefined
-          ? "Status must be ACTIVE or ARCHIVED"
-          : "Invalid status",
-    })
-    .optional(),
 });
 
 export const updateProjectSchema = createProjectSchema
+  .extend({
+    status: z
+      .enum(["ACTIVE", "ARCHIVED"], {
+        error: (issue) =>
+          issue.input === undefined
+            ? "Status must be ACTIVE or ARCHIVED"
+            : "Invalid status",
+      })
+      .optional(),
+  })
   .partial()
   .refine((data) => Object.values(data).some((value) => value !== undefined), {
     error:
