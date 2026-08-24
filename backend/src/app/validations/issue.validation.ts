@@ -31,6 +31,7 @@ export const patchIssueSchema = issueSchema
             : "Invalid issue status",
       })
       .optional(),
+    assignee: z.string().optional(),
   })
   .partial()
   .refine((data) => Object.values(data).some((value) => value !== undefined), {

@@ -53,13 +53,14 @@ export class IssueController {
   ) {
     const issue = res.locals.issue;
 
-    const { title, description, priority, status } = req.body;
+    const { title, description, priority, status, assignee } = req.body;
 
     const updateData: Record<string, any> = {};
     if (title !== undefined) updateData.title = title;
-    if (description) updateData.description = description;
-    if (priority) updateData.priority = priority;
-    if (status) updateData.status = status;
+    if (description !== undefined) updateData.description = description;
+    if (priority !== undefined) updateData.priority = priority;
+    if (status !== undefined) updateData.status = status;
+    if (assignee !== undefined) updateData.assignee = assignee;
 
     const patchedIssueDb = await Issue.findByIdAndUpdate(
       issue.id,
