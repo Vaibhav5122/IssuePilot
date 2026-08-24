@@ -9,7 +9,6 @@ export const globalErrorHandler = (
   next: NextFunction,
 ): void => {
   let finalizedError: ApiError;
-
   if (err instanceof ZodError) {
     finalizedError = ApiError.fromZod(err);
   } else if (err instanceof ApiError) {
@@ -25,6 +24,8 @@ export const globalErrorHandler = (
   } else if (err?.code === 11000) {
     finalizedError = ApiError.emailExists("Email already exists");
   } else {
+    console.log(err);
+
     finalizedError = ApiError.serverError("Internal server Error");
   }
 

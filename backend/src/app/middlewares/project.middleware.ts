@@ -11,7 +11,7 @@ export function requireProjectId() {
       }
       const isProject = await Project.findOne({
         _id: projectId,
-        workspace: res.locals.workspace.id as string,
+        workspace: res.locals.workspace.id,
       });
 
       if (!isProject) {
