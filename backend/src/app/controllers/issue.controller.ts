@@ -6,6 +6,7 @@ import type {
 import { Issue } from "../models/issue.model.js";
 import { ApiResponse } from "../../common/utils/ApiResponse.js";
 import { ApiError } from "../../common/utils/ApiError.js";
+import mongoose from "mongoose";
 
 export class IssueController {
   public async handlePostcreateIssue(
@@ -27,18 +28,19 @@ export class IssueController {
   }
 
   //Get All Issues
+  //Filtered handleGetIssue used currently
 
-  public async handleGetAllIssues(req: Request, res: Response) {
-    const project = res.locals.project;
+  // public async handleGetAllIssues(req: Request, res: Response) {
+  //   const project = res.locals.project;
 
-    const issue = await Issue.find({
-      project: project.id,
-    });
-    if (!issue) {
-      throw ApiResponse.noContent(res);
-    }
-    return ApiResponse.ok(res, "Issue find successfully", issue);
-  }
+  //   const issue = await Issue.find({
+  //     project: project.id,
+  //   });
+  //   if (!issue) {
+  //     throw ApiResponse.noContent(res);
+  //   }
+  //   return ApiResponse.ok(res, "Issue find successfully", issue);
+  // }
   // Get Issue by Id
 
   public async handleGetIssueById(req: Request, res: Response) {
@@ -86,5 +88,32 @@ export class IssueController {
     }
 
     return ApiResponse.ok(res, "Issue deleted successfully", deletedIssue);
+  }
+
+  //Issue Filter
+
+  public async handleGetIssueFilter(req: Request, res: Response) {
+    const projectId = res.locals.project.id;
+    const { status, priority, assignee } = req.query;
+
+    const filter: Record<string, any> = {
+      project: projectId,
+    };
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+    if (assignee) {
+      if (!mongoose.isValidObjectId(assignee)) {
+        throw ApiError.badRequest("Invalid assignee ID");
+      }
+      filter.assignee = assignee;
+    }
+
+    const filteredResult = await Issue.find(filter).sort({ createdAt: -1 });
+
+    if (!filteredResult) {
+      throw ApiError.badRequest("Filter not applied");
+    }
+
+    return ApiResponse.ok(res, "Issue filtered", filteredResult);
   }
 }

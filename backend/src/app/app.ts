@@ -7,6 +7,7 @@ import { authenticationMiddleware } from "./middlewares/auth.middleware.js";
 import { workspaceRouter } from "./routes/workspace.route.js";
 import { projectRouter } from "./routes/project.route.js";
 import { issueRouter } from "./routes/issue.route.js";
+import { commentRouter } from "./routes/comment.route.js";
 
 export async function expressApplication(): Promise<Application> {
   const expressApp = express();
@@ -19,6 +20,7 @@ export async function expressApplication(): Promise<Application> {
   expressApp.use("/api/v1/workspaces", workspaceRouter);
   expressApp.use("/api/v1/projects/workspaces", projectRouter);
   expressApp.use("/api/v1/issues/workspaces", issueRouter);
+  expressApp.use("/api/v1/comments/workspaces", commentRouter);
 
   expressApp.get("/health", (req, res) => {
     return res
