@@ -4,7 +4,6 @@ import { restrictUserMiddleware } from "../middlewares/auth.middleware.js";
 import {
   addWorkspaceMember,
   addWorkspaceMemberRole,
-  workspaceMembersSchema,
   worksSpaceSchema,
 } from "../validations/workspace.validation.js";
 import { validateBody } from "../middlewares/validate.middleware.js";
@@ -12,7 +11,7 @@ import {
   requireMemberId,
   requireWorkspaceAdmin,
   requireWorkspaceMember,
-} from "../middlewares/Workspace.middleware.js";
+} from "../middlewares/workspace.middleware.js";
 
 export const workspaceRouter: Router = Router();
 const workspaceController = new WorkspaceController();

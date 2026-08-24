@@ -5,6 +5,7 @@ import { ApiError } from "../common/utils/ApiError.js";
 import { userRouter } from "./routes/user.route.js";
 import { authenticationMiddleware } from "./middlewares/auth.middleware.js";
 import { workspaceRouter } from "./routes/workspace.route.js";
+import { projectRouter } from "./routes/project.route.js";
 
 export async function expressApplication(): Promise<Application> {
   const expressApp = express();
@@ -15,6 +16,7 @@ export async function expressApplication(): Promise<Application> {
   expressApp.use(authenticationMiddleware());
   expressApp.use("/api/v1/auth", userRouter);
   expressApp.use("/api/v1/workspaces", workspaceRouter);
+  expressApp.use("/api/v1/projects/workspaces", projectRouter);
 
   expressApp.get("/health", (req, res) => {
     return res
