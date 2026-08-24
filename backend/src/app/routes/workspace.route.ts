@@ -11,7 +11,7 @@ import {
   requireMemberId,
   requireWorkspaceAdmin,
   requireWorkspaceMember,
-} from "../middlewares/Workspace.middleware.js";
+} from "../middlewares/workspace.middleware.js";
 
 export const workspaceRouter: Router = Router();
 const workspaceController = new WorkspaceController();

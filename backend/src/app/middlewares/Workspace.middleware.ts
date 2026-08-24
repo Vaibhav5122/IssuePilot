@@ -47,7 +47,7 @@ export function requireWorkspaceAdmin() {
     } catch (error) {
       return next(
         ApiError.unauthorized(
-          "Admin have only permissions for any modifiications",
+          "Admin have only permissions for any modifications",
         ),
       );
     }
@@ -77,7 +77,7 @@ export function requireMemberId() {
       console.log("mmm", res.locals.memberId);
 
       next();
-    } catch (error: any) {
+    } catch (error) {
       return next(ApiError.unauthorized("Issue in workspace"));
     }
   };
