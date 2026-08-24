@@ -17,11 +17,11 @@ export const issueSchema = z.object({
     error: (issue) =>
       issue === undefined
         ? "Issue priority does not match"
-        : "Issue priority not given.",
+        : "Invalid issue priority",
   }),
 });
 
-export const patchissueSchema = issueSchema
+export const patchIssueSchema = issueSchema
   .extend({
     status: z
       .enum(["TODO", "IN_PROGRESS", "DONE"], {
@@ -39,4 +39,4 @@ export const patchissueSchema = issueSchema
   });
 
 export type IssueSchema = z.infer<typeof issueSchema>;
-export type PatchissueSchema = z.infer<typeof patchissueSchema>;
+export type PatchissueSchema = z.infer<typeof patchIssueSchema>;

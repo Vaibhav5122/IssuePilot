@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
-import type { IssueSchema } from "../validations/issue.validation.js";
+import type {
+  IssueSchema,
+  PatchissueSchema,
+} from "../validations/issue.validation.js";
 import { Issue } from "../models/issue.model.js";
 import { ApiResponse } from "../../common/utils/ApiResponse.js";
+import { ApiError } from "../../common/utils/ApiError.js";
 
 export class IssueController {
   public async handlePostcreateIssue(
@@ -22,7 +26,7 @@ export class IssueController {
     return ApiResponse.created(res, "Issue created successfully", issue);
   }
 
-  //Get Issue by Id
+  //Get All Issues
 
   public async handleGetAllIssues(req: Request, res: Response) {
     const project = res.locals.project;
@@ -34,5 +38,52 @@ export class IssueController {
       throw ApiResponse.noContent(res);
     }
     return ApiResponse.ok(res, "Issue find successfully", issue);
+  }
+  // Get Issue by Id
+
+  public async handleGetIssueById(req: Request, res: Response) {
+    return ApiResponse.ok(res, "Issue found successfully", res.locals.issue);
+  }
+
+  // Patch issue with Id
+
+  public async handlePatchIssueById(
+    req: Request<{}, {}, PatchissueSchema>,
+    res: Response,
+  ) {
+    const issue = res.locals.issue;
+
+    const { title, description, priority, status } = req.body;
+
+    const updateData: Record<string, any> = {};
+    if (title !== undefined) updateData.title = title;
+    if (description) updateData.description = description;
+    if (priority) updateData.priority = priority;
+    if (status) updateData.status = status;
+
+    const patchedIssueDb = await Issue.findByIdAndUpdate(
+      issue.id,
+      { $set: updateData },
+      { returnDocument: "after", runValidators: true },
+    );
+    if (!patchedIssueDb) {
+      throw ApiError.badRequest("Issue not updated");
+    }
+    return ApiResponse.ok(
+      res,
+      "Issue changes updated successfully",
+      patchedIssueDb,
+    );
+  }
+  public async handleDeleteIssueById(req: Request, res: Response) {
+    const issue = res.locals.issue;
+
+    const deletedIssue = await Issue.findByIdAndDelete(issue.id);
+
+    if (!deletedIssue) {
+      throw ApiError.badRequest("Issue not deleted");
+    }
+
+    return ApiResponse.ok(res, "Issue deleted successfully", deletedIssue);
   }
 }
