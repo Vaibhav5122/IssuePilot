@@ -20,4 +20,20 @@ commentRouter
     requireProjectId(),
     requireIssueId(),
     commentController.handlePostComments.bind(commentController),
+  )
+  .get(
+    restrictUserMiddleware(),
+    requireWorkspaceMember(),
+    requireProjectId(),
+    requireIssueId(),
+    commentController.handleGetComment.bind(commentController),
   );
+
+commentRouter.delete(
+  "/:workspaceId/projects/:projectId/issues/:issueId/comments/:commentId",
+  restrictUserMiddleware(),
+  requireWorkspaceMember(),
+  requireProjectId(),
+  requireIssueId(),
+  commentController.handleDeleteCommentById.bind(commentController),
+);

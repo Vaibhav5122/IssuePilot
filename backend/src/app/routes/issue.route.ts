@@ -52,3 +52,11 @@ issueRouter
     requireIssueId(),
     issueController.handleDeleteIssueById.bind(issueController),
   );
+issueRouter.get(
+  "/:workspaceId/projects/:projectId/issues/:issueId/activity",
+  restrictUserMiddleware(),
+  requireWorkspaceMember(),
+  requireProjectId(),
+  requireIssueId(),
+  issueController.handleGetIssueActivity.bind(issueController),
+);
