@@ -70,12 +70,25 @@ export class CommentController {
       throw ApiError.notFound("Comment not found");
     }
     const isAuthor = commentCheck?.author.toString() === userId?.toString();
-    const isAdmin = admin.role !== "ADMIN";
+    const isAdmin = admin.role === "ADMIN";
 
     if (!isAuthor && !isAdmin) {
       throw ApiError.forbidden("Do Not have permission to delete comment");
     }
-    const deleteComment = await Comment.findByIdAndDelete(commentId);
+
+    const comment = await Comment.findOne({
+      id: commentId,
+      issue: res.locals.issue.id,
+    });
+
+    if (!comment) {
+      throw ApiError.notFound("Comment not found in this issue");
+    }
+
+    const deleteComment = await Comment.findOneAndDelete({
+      id: comment.id,
+      issue: res.locals.issue.id,
+    });
 
     return ApiResponse.ok(res, "Comment deleted successfully", deleteComment);
   }
