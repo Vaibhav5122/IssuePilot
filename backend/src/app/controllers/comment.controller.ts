@@ -80,6 +80,7 @@ export class CommentController {
       id: commentId,
       issue: res.locals.issue.id,
     });
+    console.log(comment);
 
     if (!comment) {
       throw ApiError.notFound("Comment not found in this issue");
