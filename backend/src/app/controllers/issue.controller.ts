@@ -8,6 +8,7 @@ import { ApiResponse } from "../../common/utils/ApiResponse.js";
 import { ApiError } from "../../common/utils/ApiError.js";
 import mongoose from "mongoose";
 import { IssueActivity } from "../models/issueActivity.model.js";
+import { WorkspaceMember } from "../models/workspace-member.model.js";
 
 export class IssueController {
   public async handlePostcreateIssue(
@@ -86,7 +87,25 @@ export class IssueController {
     if (description !== undefined) updateData.description = description;
     if (priority !== undefined) updateData.priority = priority;
     if (status !== undefined) updateData.status = status;
-    if (assignee !== undefined) updateData.assignee = assignee;
+    if (assignee !== undefined) {
+      if (assignee === null) {
+        updateData.assignee = null;
+      } else {
+        if (!mongoose.isValidObjectId(assignee)) {
+          throw ApiError.badRequest("Invalid assignee ID");
+        }
+        const member = await WorkspaceMember.findOne({
+          workspace: res.locals.workspace.id,
+          user: assignee,
+        });
+        if (!member) {
+          throw ApiError.badRequest(
+            "Assignee must be a member of this workspace",
+          );
+        }
+        updateData.assignee = assignee;
+      }
+    }
 
     const patchedIssueDb = await Issue.findByIdAndUpdate(
       issue.id,
