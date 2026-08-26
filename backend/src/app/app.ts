@@ -1,3 +1,4 @@
+import cors from "cors";
 import express, { type Application } from "express";
 import { connectDB } from "./configs/db.config.js";
 import { globalErrorHandler } from "../common/utils/GlobalErrorHandler.js";
@@ -14,6 +15,7 @@ export async function expressApplication(): Promise<Application> {
 
   await connectDB();
 
+  expressApp.use(cors());
   expressApp.use(express.json());
   expressApp.use(authenticationMiddleware());
   expressApp.use("/api/v1/auth", userRouter);
