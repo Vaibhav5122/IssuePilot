@@ -2,14 +2,15 @@
 
 import {
   ChevronDown,
+  FileBarChart,
   FolderClosedIcon,
   HomeIcon,
   Layers,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
-import React from "react";
 import Link from "next/link";
+import Members from "../sidebar/members";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -45,11 +46,19 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
 
         <nav className="flex flex-col gap-1.5">
           <Link
-            href="/workspaces"
+            href="/overview"
             className="flex items-center gap-3 rounded-xl bg-[#1a2347] px-3.5 py-2.5 text-sm font-medium text-white shadow-sm"
           >
             <HomeIcon size={18} className="text-indigo-400" />
             <span>Overview</span>
+          </Link>
+
+          <Link
+            href="/workspaces"
+            className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-gray-400 transition hover:bg-white/5 hover:text-white"
+          >
+            <FileBarChart size={18} />
+            <span>Workspaces</span>
           </Link>
 
           <Link
@@ -60,13 +69,15 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
             <span>Projects</span>
           </Link>
 
-          <Link
+          {/* <Link
             href="/members"
             className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-gray-400 transition hover:bg-white/5 hover:text-white"
           >
             <UsersIcon size={18} />
             <span>Members</span>
-          </Link>
+          </Link> */}
+
+          <Members />
 
           <Link
             href="/settings"
