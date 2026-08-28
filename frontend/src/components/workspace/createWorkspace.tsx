@@ -3,30 +3,35 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
-import { usePostCreateMembers } from "@/lib/hooks/useMembers/useMembers";
-import { useParams } from "next/navigation";
+import { usePostCreateWorkspace } from "@/lib/hooks/useWorkspace/useGetWorkspace";
 
-export const AddMember = ({ memberId, isOpen, onClose }: any) => {
+export const CreateWorkspace = ({ isOpen, onClose }: any) => {
   if (!isOpen) return null;
 
-  const [email, setEmail] = useState({ email: "" });
+  const [create, setCreate] = useState({ name: "", description: "" });
 
   const handleClose = () => {
     onClose();
     document.body.style.overflow = "";
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+
+    setCreate({ ...create, [e.target.name]: e.target.value });
+  };
+
   const { mutate: createWorkspace, isPending: Loading } =
-    usePostCreateMembers(memberId);
+    usePostCreateWorkspace();
 
   const handleSubmit = () => {
-    createWorkspace(email, {
+    createWorkspace(create, {
       onSuccess: (data) => {
-        console.log("User added successfully", data);
+        console.log("Workspace created successfully", data);
         handleClose();
       },
       onError: (error) => {
-        console.error("Failed to add user in workspace:", error);
+        console.error("Failed to create workspace:", error);
       },
     });
   };
@@ -45,21 +50,25 @@ export const AddMember = ({ memberId, isOpen, onClose }: any) => {
           <X cursor={"pointer"} onClick={handleClose} />
         </div>
         <input
-          name="email"
-          onChange={(e) =>
-            setEmail({ ...email, [e.target.name]: e.target.value })
-          }
-          defaultValue={email.email}
-          type="email"
-          placeholder="Enter user email to add..."
+          name="name"
+          onChange={handleChange}
+          defaultValue={create.name}
+          type="text"
+          placeholder="Enter workspace name..."
           className="w-full border p-2 rounded-lg mb-4 outline-none"
         />
-
+        <textarea
+          name="description"
+          defaultValue={create.description}
+          placeholder="Enter workspace description..."
+          className="w-full border p-2 rounded-lg mb-4 outline-none"
+        />
         <Button
           onClick={handleSubmit}
+          disabled={Loading}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg font-medium"
         >
-          {Loading ? "Adding..." : "Add Members"}
+          {Loading ? "creating..." : "Create Workspace"}
         </Button>
       </div>
     </div>

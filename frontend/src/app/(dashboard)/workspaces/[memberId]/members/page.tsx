@@ -1,4 +1,5 @@
 "use client";
+
 import { AddMember } from "@/components/members/addMember";
 import { Button } from "@/components/ui/button";
 import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers/useMembers";
@@ -40,8 +41,11 @@ const members = () => {
             {" "}
             <UserPlusIcon /> Add Members
           </Button>
-          <AddMember isOpen={isOpen} onClose={() => setIsOpen(false)} />
-          {/* <AddMember /> */}
+          <AddMember
+            memberId={memberId}
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+          />
         </div>
 
         <div className="mt-4 flex items-center justify-center sm:justify-start">
@@ -90,38 +94,6 @@ const members = () => {
                 ))
               : ""}
           </table>
-
-          {/* <table className="flex-col border rounded flex w-full items-center justify-center ">
-            <thead className="w-full border-b p-4">
-              <tr className="justify-between sm:flex-row items-center flex">
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody className="flex-col border-b w-full p-4 ">
-              <tr className="justify-between items-center sm:flex-row flex-col gap-2 w-full flex flex-wrap overflow-x-clip">
-                <td>Vaibhav Waghmode</td>
-                <td className="">vwaghmode5757@gmail.com</td>
-                <td>
-                  <p
-                    className={
-                      "px-3 py-0 rounded-sm font-bold bg-purple-300 text-purple-700 w-fit"
-                    }
-                  >
-                    Admin
-                  </p>{" "}
-                </td>
-                <td> May 12,2024</td>
-                <td>
-                  {" "}
-                  <MoreVerticalIcon />{" "}
-                </td>
-              </tr>
-            </tbody>
-          </table> */}
         </div>
       </div>
     </div>

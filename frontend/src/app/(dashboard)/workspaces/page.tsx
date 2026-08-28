@@ -1,12 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { CreateWorkspace } from "@/components/workspace/createWorkspace";
 import { useGetWorkspace } from "@/lib/hooks/useWorkspace/useGetWorkspace";
 import { FolderIcon, PlusIcon, Users } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function WorkspacesPage() {
   const { data: workspaces, isPending } = useGetWorkspace();
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsOpen(true);
+    document.body.style.overflow = "hidden";
+  };
 
   return (
     <div className="flex-1 p-4 md:p-8 lg:p-10">
@@ -20,9 +29,13 @@ export default function WorkspacesPage() {
               Manage your workspaces and team access.
             </p>
           </div>
-          <Button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+          <Button
+            onClick={toggleModal}
+            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
             <PlusIcon size={18} /> New Workspace
           </Button>
+          <CreateWorkspace isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </div>
 
         {isPending ? (
