@@ -1,13 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
 import { ApiError } from "../../common/utils/ApiError.js";
 import { Project } from "../models/project.model.js";
+import mongoose from "mongoose";
 
 export function requireProjectId() {
   return async function (req: Request, res: Response, next: NextFunction) {
     try {
       const { projectId } = req.params;
-      if (!projectId) {
-        return next(ApiError.badRequest("Project id not given"));
+      if (!projectId || !mongoose.isValidObjectId(projectId)) {
+        return next(ApiError.badRequest("Project id not given or invalid"));
       }
       const isProject = await Project.findOne({
         _id: projectId,

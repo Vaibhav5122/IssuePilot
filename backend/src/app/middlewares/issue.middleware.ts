@@ -8,7 +8,6 @@ export function requireIssueId() {
     try {
       const { issueId } = req.params;
       const projectId = res.locals.project.id;
-
       if (
         !issueId ||
         !mongoose.isValidObjectId(issueId) ||

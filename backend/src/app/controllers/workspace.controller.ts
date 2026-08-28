@@ -78,7 +78,7 @@ export class WorkspaceController {
         role: item.role,
       };
     });
-    return ApiResponse.ok(res, "Here is Your workspace", { formattedResponse });
+    return ApiResponse.ok(res, "Here is Your workspace", formattedResponse);
   }
   public async handleGetOneWorkspace(req: Request, res: Response) {
     const membership = res.locals.membership;
