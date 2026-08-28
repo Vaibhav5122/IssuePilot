@@ -1,10 +1,8 @@
 import { apiClient } from "@/lib/api/axios-client";
 import { getToken } from "@/lib/auth/token";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useGetWorkspace() {
-  const token = getToken();
-
   return useQuery({
     queryKey: ["workspaces"],
     queryFn: async () => {
@@ -13,4 +11,10 @@ export function useGetWorkspace() {
       return response.data.data;
     },
   });
+}
+
+export function usePostCreateWorkspace() {
+    return useMutation({
+        mutationFn:async(values)=>{}
+    })
 }

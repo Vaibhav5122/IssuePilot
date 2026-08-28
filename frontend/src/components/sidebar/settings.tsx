@@ -1,18 +1,16 @@
 "use client";
 
-import { FileBarChart } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
-const Workspaces = () => {
+const Settings = () => {
   const pathname = usePathname();
   const params = useParams();
   const memberId = params?.memberId as string | undefined;
 
-  const href = memberId ? `/workspaces/${memberId}` : "/workspaces";
-  const isActive =
-    pathname === "/workspaces" ||
-    (pathname.startsWith("/workspaces") && !pathname.includes("/members"));
+  const href = memberId ? `/workspaces/${memberId}/settings` : "/settings";
+  const isActive = pathname === "/settings" || pathname.startsWith("/settings");
 
   return (
     <Link
@@ -23,10 +21,13 @@ const Workspaces = () => {
           : "text-gray-400 hover:bg-white/5 hover:text-white"
       }`}
     >
-      <FileBarChart size={18} className={isActive ? "text-indigo-400" : ""} />
-      <span>Workspaces</span>
+      <SettingsIcon
+        size={18}
+        className={isActive ? "text-indigo-400" : ""}
+      />
+      <span>Settings</span>
     </Link>
   );
 };
 
-export default Workspaces;
+export default Settings;

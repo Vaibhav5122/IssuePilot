@@ -35,7 +35,6 @@ export default function DashboardLayout({
               <div className="w-8" />
             </header>
 
-            <Sidebar />
             {children}
           </div>
         </div>

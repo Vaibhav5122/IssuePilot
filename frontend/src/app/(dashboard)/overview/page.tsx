@@ -1,6 +1,5 @@
 "use client";
 
-import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { useGetWorkspace } from "@/lib/hooks/useWorkspace/useGetWorkspace";
 import {
@@ -8,50 +7,18 @@ import {
   CircleCheck,
   CircleDotIcon,
   FolderIcon,
-  Menu,
   MoreHorizontal,
   PlusIcon,
   ShoppingCartIcon,
 } from "lucide-react";
-import { useState } from "react";
 
 const WorkspacePage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const { data: workspaces, isPending, error } = useGetWorkspace();
   console.log("shaa", workspaces);
-  // console.log("tesstst", workspaces.formatted);
-
-  // if(workspaces.length < 1){
-
-  // }
 
   return (
-    <div className="flex min-h-screen w-full bg-[#f9fafb]">
-      {/* {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-        />
-      )}
-
-      <Sidebar isOpen={sidebarOpen} /> */}
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-        {/* <header className="flex h-14 items-center justify-between border-b bg-white px-4 lg:hidden">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100"
-          >
-            <Menu size={22} />
-          </button>
-          <span className="font-semibold text-gray-800">IssuePilot</span>
-          <div className="w-8" />
-        </header> */}
-
-        <main className="flex-1 p-4 md:p-8 lg:p-10">
-          {/* <div>Mick checkejejen</div> */}
-          <div className="mx-auto flex max-w-6xl flex-col gap-8">
+    <main className="flex-1 p-4 md:p-8 lg:p-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               {/* {workspaces && workspaces.length < 1 ? (
                 <Button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
@@ -170,8 +137,6 @@ const WorkspacePage = () => {
             </div>
           </div>
         </main>
-      </div>
-    </div>
   );
 };
 

@@ -1,18 +1,16 @@
 "use client";
 
-import { FileBarChart } from "lucide-react";
+import { FolderClosedIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
-const Workspaces = () => {
+const Projects = () => {
   const pathname = usePathname();
   const params = useParams();
   const memberId = params?.memberId as string | undefined;
 
-  const href = memberId ? `/workspaces/${memberId}` : "/workspaces";
-  const isActive =
-    pathname === "/workspaces" ||
-    (pathname.startsWith("/workspaces") && !pathname.includes("/members"));
+  const href = memberId ? `/workspaces/${memberId}/projects` : "/projects";
+  const isActive = pathname === "/projects" || pathname.startsWith("/projects");
 
   return (
     <Link
@@ -23,10 +21,13 @@ const Workspaces = () => {
           : "text-gray-400 hover:bg-white/5 hover:text-white"
       }`}
     >
-      <FileBarChart size={18} className={isActive ? "text-indigo-400" : ""} />
-      <span>Workspaces</span>
+      <FolderClosedIcon
+        size={18}
+        className={isActive ? "text-indigo-400" : ""}
+      />
+      <span>Projects</span>
     </Link>
   );
 };
 
-export default Workspaces;
+export default Projects;
