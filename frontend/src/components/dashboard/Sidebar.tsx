@@ -1,15 +1,11 @@
 "use client";
 
-import {
-  ChevronDown,
-  FolderClosedIcon,
-  HomeIcon,
-  Layers,
-  SettingsIcon,
-  UsersIcon,
-} from "lucide-react";
-import React from "react";
-import Link from "next/link";
+import { ChevronDown, Layers } from "lucide-react";
+import Overview from "../sidebar/overview";
+import Workspaces from "../sidebar/workspaces";
+import Projects from "../sidebar/projects";
+import Members from "../sidebar/members";
+import Settings from "../sidebar/settings";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -44,37 +40,11 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
         </button>
 
         <nav className="flex flex-col gap-1.5">
-          <Link
-            href="/workspaces"
-            className="flex items-center gap-3 rounded-xl bg-[#1a2347] px-3.5 py-2.5 text-sm font-medium text-white shadow-sm"
-          >
-            <HomeIcon size={18} className="text-indigo-400" />
-            <span>Overview</span>
-          </Link>
-
-          <Link
-            href="/projects"
-            className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-gray-400 transition hover:bg-white/5 hover:text-white"
-          >
-            <FolderClosedIcon size={18} />
-            <span>Projects</span>
-          </Link>
-
-          <Link
-            href="/members"
-            className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-gray-400 transition hover:bg-white/5 hover:text-white"
-          >
-            <UsersIcon size={18} />
-            <span>Members</span>
-          </Link>
-
-          <Link
-            href="/settings"
-            className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-gray-400 transition hover:bg-white/5 hover:text-white"
-          >
-            <SettingsIcon size={18} />
-            <span>Settings</span>
-          </Link>
+          <Overview />
+          <Workspaces />
+          <Projects />
+          <Members />
+          <Settings />
         </nav>
       </div>
 
