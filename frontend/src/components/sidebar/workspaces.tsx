@@ -9,7 +9,7 @@ const Workspaces = () => {
   const params = useParams();
   const memberId = params?.memberId as string | undefined;
 
-  const href = memberId ? `/workspaces/${memberId}` : "/workspaces";
+  const href = memberId ? `/workspaces` : "/workspaces";
   const isActive =
     pathname === "/workspaces" ||
     (pathname.startsWith("/workspaces") && !pathname.includes("/members"));
