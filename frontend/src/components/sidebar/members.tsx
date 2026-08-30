@@ -4,17 +4,22 @@ import { UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useGetWorkspace } from "@/lib/hooks/useWorkspace/useGetWorkspace";
+import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers/useMembers";
 
 const Members = () => {
   const params = useParams();
   const pathname = usePathname();
   const { data: workspaces } = useGetWorkspace();
 
+  //get members
+
   const memberId =
     (params?.memberId as string | undefined) || workspaces?.[0]?.workspace?.id;
+  console.log(memberId);
 
   const href = memberId ? `/workspaces/${memberId}/members` : "/members";
   const isActive = pathname.includes("/members");
+  console.log("eeeee", href);
 
   return (
     <Link

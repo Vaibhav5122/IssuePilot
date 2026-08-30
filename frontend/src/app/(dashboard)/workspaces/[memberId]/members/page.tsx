@@ -1,11 +1,26 @@
-import { Button } from "@/components/ui/button";
-import { MoreVerticalIcon, UserPlusIcon, Users } from "lucide-react";
+"use client";
 
-type Props = {
-  params: Promise<{ memberId: string }>;
-};
-const members = async ({ params }: Props) => {
-  const { memberId } = await params;
+import { AddMember } from "@/components/members/addMember";
+import { Button } from "@/components/ui/button";
+import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers/useMembers";
+import { MoreVerticalIcon, UserPlusIcon, Users } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+
+const members = () => {
+  const params = useParams();
+  const memberId = params?.memberId as string;
+
+  console.log(memberId);
+
+  const { data: members, error, isPending } = useGetWorkspaceMembers(memberId);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsOpen(true);
+    document.body.style.overflow = "hidden";
+  };
 
   return (
     <div className="flex-1 p-4 md:p-8 lg:p-10">
@@ -19,15 +34,24 @@ const members = async ({ params }: Props) => {
               Manage workspace members and there access.
             </p>
           </div>
-          <Button className={"bg-blue-600 hover:bg-blue-700 rounded-xl"}>
+          <Button
+            onClick={toggleModal}
+            className={"bg-blue-600 hover:bg-blue-700 rounded-xl"}
+          >
             {" "}
             <UserPlusIcon /> Add Members
           </Button>
+          <AddMember
+            memberId={memberId}
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+          />
         </div>
 
         <div className="mt-4 flex items-center justify-center sm:justify-start">
           <p className="flex gap-2 items-center text-sm font-medium text-gray-500">
-            <Users size={20} /> 6 Members
+            <Users size={20} />{" "}
+            {members && members?.length > 0 ? `${members?.length} Members` : ""}
           </p>
         </div>
 
@@ -42,26 +66,33 @@ const members = async ({ params }: Props) => {
                 <th></th>
               </tr>
             </thead>
-            <tbody className="flex-col border-b w-full p-4 ">
-              <tr className="justify-between items-center sm:flex-row flex-col gap-2 w-full flex flex-wrap overflow-x-clip">
-                <td>Vaibhav Waghmode</td>
-                <td className="">vwaghmode5757@gmail.com</td>
-                <td>
-                  <p
-                    className={
-                      "px-3 py-0 rounded-sm font-bold bg-purple-300 text-purple-700 w-fit"
-                    }
+            {members && members?.length > 0
+              ? members?.map((data: any) => (
+                  <tbody
+                    className="flex-col border-b w-full p-4 "
+                    key={data?._id}
                   >
-                    Admin
-                  </p>{" "}
-                </td>
-                <td> May 12,2024</td>
-                <td>
-                  {" "}
-                  <MoreVerticalIcon />{" "}
-                </td>
-              </tr>
-            </tbody>
+                    <tr className="justify-between items-center sm:flex-row flex-col gap-2 w-full flex flex-wrap overflow-x-clip">
+                      <td>{data.user.name}</td>
+                      <td className="">{data.user.email}</td>
+                      <td>
+                        <p
+                          className={
+                            "px-3 py-0 rounded-sm font-bold bg-purple-300 text-purple-700 w-fit"
+                          }
+                        >
+                          {data.role}
+                        </p>{" "}
+                      </td>
+                      <td> {data.createdAt}</td>
+                      <td>
+                        {" "}
+                        <MoreVerticalIcon />
+                      </td>
+                    </tr>
+                  </tbody>
+                ))
+              : ""}
           </table>
         </div>
       </div>

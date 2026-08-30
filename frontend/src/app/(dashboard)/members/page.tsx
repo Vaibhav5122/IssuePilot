@@ -1,7 +1,17 @@
+"use client";
 import { Button } from "@/components/ui/button";
+import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers/useMembers";
 import { MoreVerticalIcon, UserPlusIcon, Users } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function MembersPage() {
+  // const params = useParams();
+  // const memberId = params?.memberId as string;
+  // console.log(memberId);
+
+  // const { data: members, error, isPending } = useGetWorkspaceMembers(memberId);
+  // console.log("tststtst", members);
+  // console.log(error);
   return (
     <div className="flex-1 p-4 md:p-8 lg:p-10">
       <div className="mx-auto flex-col sm:flex-row max-w-6xl gap-8">
