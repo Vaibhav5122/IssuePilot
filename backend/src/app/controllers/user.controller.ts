@@ -77,6 +77,8 @@ export class UserController {
     }
 
     return ApiResponse.ok(res, "User found", {
+      id: user._id,
+      _id: user._id,
       name: user.name,
       email: user.email,
     });
