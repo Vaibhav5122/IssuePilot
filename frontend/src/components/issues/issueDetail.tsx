@@ -26,6 +26,7 @@ import { useGetComments, useCreateComment, useDeleteComment } from "@/lib/hooks/
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers";
 import { useUser } from "@/lib/hooks/useAuth";
+import { useActiveWorkspace } from "@/lib/hooks/useActiveWorkspace";
 
 interface IssueDetailModalProps {
   workspaceId: string;
@@ -45,6 +46,8 @@ export function IssueDetailModal({
   const { data: activities } = useGetIssueActivity(workspaceId, projectId, issueId);
   const { data: members } = useGetWorkspaceMembers(workspaceId);
   const { data: currentUser } = useUser();
+  const { activeMemberRole } = useActiveWorkspace();
+  const isAdmin = activeMemberRole === "ADMIN";
 
   const updateIssue = useUpdateIssue(workspaceId, projectId);
   const deleteIssue = useDeleteIssue(workspaceId, projectId);
@@ -54,6 +57,16 @@ export function IssueDetailModal({
   const [commentText, setCommentText] = useState("");
   const [activeTab, setActiveTab] = useState<"comments" | "activity">("comments");
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+
+  const handleConfirmDeleteComment = () => {
+    if (!commentToDelete) return;
+    deleteComment.mutate(commentToDelete, {
+      onSuccess: () => {
+        setCommentToDelete(null);
+      },
+    });
+  };
 
   if (!issueId || !issue) return null;
 
@@ -188,13 +201,20 @@ export function IssueDetailModal({
                     {comments && comments.length > 0 ? (
                       comments.map((comment: any) => {
                         const authorName = comment.author?.name || comment.user?.name || "Member";
+                        const authorEmail = comment.author?.email || comment.user?.email;
                         const authorId = comment.author?._id || comment.author?.id || comment.author || comment.user?._id || comment.user?.id;
-                        const isMyComment = authorId && currentUser?._id && (authorId.toString() === currentUser._id.toString() || authorId.toString() === currentUser.id?.toString());
+                        
+                        const isAuthor =
+                          (currentUser?.email && authorEmail && currentUser.email.toLowerCase() === authorEmail.toLowerCase()) ||
+                          (authorId && currentUser?._id && authorId.toString() === currentUser._id.toString()) ||
+                          (authorId && currentUser?.id && authorId.toString() === currentUser.id.toString());
+
+                        const canDelete = isAuthor || isAdmin;
 
                         return (
                           <div
                             key={comment._id || comment.id}
-                            className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-1.5 text-xs"
+                            className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-1.5 text-xs group"
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-semibold text-foreground">
@@ -204,13 +224,14 @@ export function IssueDetailModal({
                                 <span className="text-[10px] text-muted-foreground">
                                   {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
-                                {isMyComment && (
+                                {canDelete && (
                                   <button
-                                    onClick={() => deleteComment.mutate(comment._id || comment.id)}
-                                    className="text-muted-foreground hover:text-red-500 cursor-pointer p-0.5 rounded transition-colors"
+                                    type="button"
+                                    onClick={() => setCommentToDelete(comment._id || comment.id)}
+                                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer p-1 rounded-md transition-colors"
                                     title="Delete comment"
                                   >
-                                    <Trash2 size={12} />
+                                    <Trash2 size={13} />
                                   </button>
                                 )}
                               </div>
@@ -358,6 +379,17 @@ export function IssueDetailModal({
         confirmText="Delete Issue"
         variant="destructive"
         isLoading={deleteIssue.isPending}
+      />
+
+      <ConfirmDialog
+        isOpen={!!commentToDelete}
+        onClose={() => setCommentToDelete(null)}
+        onConfirm={handleConfirmDeleteComment}
+        title="Delete Comment"
+        description="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText="Delete Comment"
+        variant="destructive"
+        isLoading={deleteComment.isPending}
       />
     </div>
   );

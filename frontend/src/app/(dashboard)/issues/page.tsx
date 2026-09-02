@@ -130,7 +130,7 @@ export default function IssuesPage() {
 
         <div className="flex items-center gap-3">
           {/* Project Switcher Selector */}
-          {projects && projects.length > 0 && (
+          {projects && projects.length > 1 ? (
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
@@ -138,11 +138,21 @@ export default function IssuesPage() {
             >
               {projects.map((p: any) => (
                 <option key={p._id || p.id} value={p._id || p.id}>
-                  Project: {p.name} ({p.key})
+                  {p.name}{p.key ? ` (${p.key})` : ""}
                 </option>
               ))}
             </select>
-          )}
+          ) : projects && projects.length === 1 ? (
+            <div className="h-10 rounded-xl border border-border bg-card px-3.5 flex items-center gap-2 text-sm font-semibold text-foreground shadow-2xs">
+              <FolderKanban size={16} className="text-primary shrink-0" />
+              <span className="truncate max-w-[200px]">{projects[0].name}</span>
+              {projects[0].key && (
+                <span className="text-xs font-mono font-normal text-muted-foreground">
+                  ({projects[0].key})
+                </span>
+              )}
+            </div>
+          ) : null}
 
           {selectedProjectId && (
             <Button
