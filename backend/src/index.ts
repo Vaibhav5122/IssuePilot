@@ -7,10 +7,10 @@ import { envZod } from "./app/utils/envSanitizations.js";
   try {
     const nodeServer = createServer(await expressApplication());
 
-    const PORT: Number = envZod.PORT ? +envZod.PORT : 8000;
+    const PORT = envZod.PORT ? parseInt(envZod.PORT, 10) : 8000;
 
-    nodeServer.listen(PORT, () => {
-      console.log(`Server starts in PORT ${PORT}`);
+    nodeServer.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server starts on PORT ${PORT}`);
     });
   } catch (error) {
     console.error("Server failed to start", error);

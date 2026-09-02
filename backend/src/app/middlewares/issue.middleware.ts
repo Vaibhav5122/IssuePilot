@@ -19,7 +19,7 @@ export function requireIssueId() {
       const issue = await Issue.findOne({
         _id: issueId,
         project: projectId,
-      });
+      }).populate("assignee", "name email");
 
       if (!issue) {
         return next(ApiError.notFound("Issue doesn't exists in this project"));

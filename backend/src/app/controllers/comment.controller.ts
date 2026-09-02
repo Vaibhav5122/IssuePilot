@@ -44,11 +44,9 @@ export class CommentController {
   public async handleGetComment(req: Request, res: Response) {
     const issue = res.locals.issue;
 
-    const comments = await Comment.find({ issue: issue.id });
-
-    if (!comments) {
-      ApiResponse.noContent(res);
-    }
+    const comments = await Comment.find({ issue: issue.id })
+      .populate("author", "name email")
+      .sort({ createdAt: 1 });
 
     return ApiResponse.ok(res, "Comments fetched succesfully", comments);
   }
@@ -60,36 +58,28 @@ export class CommentController {
     const admin = res.locals.membership;
     const { commentId } = req.params;
 
-    if (!mongoose.isValidObjectId(commentId)) {
+    if (!commentId || !mongoose.isValidObjectId(commentId)) {
       throw ApiError.badRequest("Invalid comment id");
     }
 
-    const commentCheck = await Comment.findById(commentId);
+    const comment = await Comment.findById(commentId);
 
-    if (!commentCheck) {
+    if (!comment) {
       throw ApiError.notFound("Comment not found");
     }
-    const isAuthor = commentCheck?.author.toString() === userId?.toString();
-    const isAdmin = admin.role === "ADMIN";
+    const isAuthor = comment.author.toString() === userId?.toString();
+    const isAdmin = admin && admin.role === "ADMIN";
 
     if (!isAuthor && !isAdmin) {
       throw ApiError.forbidden("Do Not have permission to delete comment");
     }
 
-    const comment = await Comment.findOne({
-      id: commentId,
-      issue: res.locals.issue.id,
-    });
-    console.log(comment);
-
-    if (!comment) {
+    const issueId = (res.locals.issue.id || res.locals.issue._id).toString();
+    if (comment.issue.toString() !== issueId) {
       throw ApiError.notFound("Comment not found in this issue");
     }
 
-    const deleteComment = await Comment.findOneAndDelete({
-      id: comment.id,
-      issue: res.locals.issue.id,
-    });
+    const deleteComment = await Comment.findByIdAndDelete(commentId);
 
     return ApiResponse.ok(res, "Comment deleted successfully", deleteComment);
   }

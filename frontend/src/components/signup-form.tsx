@@ -15,7 +15,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useRegister } from "@/lib/hooks/useAuth/useRegister";
+import { useRegister } from "@/lib/hooks/useAuth";
 import { Controller, useForm } from "react-hook-form";
 import {
   RegisterFormValues,

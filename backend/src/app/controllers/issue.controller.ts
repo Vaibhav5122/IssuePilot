@@ -26,16 +26,16 @@ export class IssueController {
     const issue = await Issue.create({
       title,
       ...(description !== undefined && { description }),
-      priority,
+      ...(priority !== undefined && { priority }),
       project: project.id,
       createdBy: userId,
-    });
+    } as any);
     if (!issue) {
       throw ApiError.badRequest("Issue not created");
     }
 
     await IssueActivity.create({
-      issue: issue.id,
+      issue: (issue as any).id || (issue as any)._id,
       actor: userId,
       type: "ISSUE_CREATED",
       // ...(description !== undefined && { details: description }),

@@ -20,42 +20,67 @@ export class WorkspaceController {
     const { name, description } = req.body;
 
     if (!req.user || !req.user.id) {
-      return ApiError.unauthorized("Unauthorized");
+      throw ApiError.unauthorized("Unauthorized");
     }
 
     const userId = req.user.id;
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-      const newWorkspace = new Workspace({
-        name,
-        description,
-        createdBy: userId,
-      });
-      await newWorkspace.save({ session });
+      // Try with MongoDB transaction if replica set is supported
+      const session = await mongoose.startSession();
+      try {
+        session.startTransaction();
+        const newWorkspace = new Workspace({
+          name,
+          description: description || undefined,
+          createdBy: userId,
+        });
+        await newWorkspace.save({ session });
 
-      const newMember = new WorkspaceMember({
-        workspace: newWorkspace.id,
-        user: userId,
-        role: "ADMIN",
-      });
-      await newMember.save({ session });
+        const newMember = new WorkspaceMember({
+          workspace: newWorkspace.id,
+          user: userId,
+          role: "ADMIN",
+        });
+        await newMember.save({ session });
 
-      await session.commitTransaction();
-      session.endSession();
+        await session.commitTransaction();
+        session.endSession();
 
-      return ApiResponse.created(res, "Workspace created successfully", {
-        data: {
+        return ApiResponse.created(res, "Workspace created successfully", {
           workspace: { id: newWorkspace.id, name: newWorkspace.name },
           role: newMember.role,
-        },
-      });
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      throw ApiError.serverError("Internal server error");
+        });
+      } catch (txError: any) {
+        await session.abortTransaction();
+        session.endSession();
+        throw txError;
+      }
+    } catch (error: any) {
+      // If transactions fail (e.g. standalone MongoDB without replica set), perform non-transactional fallback
+      console.warn("Transaction failed, running fallback workspace creation:", error?.message || error);
+      try {
+        const newWorkspace = new Workspace({
+          name,
+          description: description || undefined,
+          createdBy: userId,
+        });
+        await newWorkspace.save();
+
+        const newMember = await WorkspaceMember.create({
+          workspace: newWorkspace.id,
+          user: userId,
+          role: "ADMIN",
+        });
+
+        return ApiResponse.created(res, "Workspace created successfully", {
+          workspace: { id: newWorkspace.id, name: newWorkspace.name },
+          role: newMember.role,
+        });
+      } catch (fallbackError: any) {
+        console.error("Failed to create workspace:", fallbackError);
+        throw ApiError.serverError(fallbackError.message || "Internal server error");
+      }
     }
   }
   public async handleGetMyAllWorkspace(

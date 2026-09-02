@@ -2,25 +2,11 @@ import z from "zod";
 
 export const createProjectSchema = z.object({
   name: z
-    .string({
-      error: (issue) =>
-        issue.input === undefined
-          ? "Project name must be required"
-          : "Invalid text format",
-    })
+    .string()
     .trim()
-    .min(2, "Project name should be atleast 2 char long")
-    .max(166, "Project name length too long"),
-
-  description: z
-    .string({
-      error: (issue) =>
-        issue.input === undefined
-          ? "Description is not provided"
-          : "Invalid text format",
-    })
-    .max(500, "Project description too long")
-    .optional(),
+    .min(2, "Project name should be at least 2 characters long")
+    .max(166, "Project name length is too long"),
+  description: z.string().max(500, "Project description too long").optional(),
 });
 
 export const updateProjectSchema = createProjectSchema

@@ -2,13 +2,11 @@ import { z } from "zod";
 
 export const worksSpaceSchema = z.object({
   name: z
-    .string({
-      error: (issue) =>
-        issue.input === undefined ? "Name is required" : "Invalid text format",
-    })
-    .min(2, "Workspace name should be atleast 2 character long")
+    .string()
+    .trim()
+    .min(2, "Workspace name should be at least 2 characters long")
     .max(66, "Workspace name is too long"),
-  description: z.string().optional(),
+  description: z.string().max(500, "Description is too long").optional(),
 });
 
 export const workspaceMembersSchema = z.object({

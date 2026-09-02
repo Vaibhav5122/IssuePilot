@@ -21,13 +21,21 @@ const issueSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["TODO", "IN_PROGRESS", "DONE"],
+      enum: ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"],
       default: "TODO",
     },
     priority: {
       type: String,
-      enum: ["LOW", "MEDIUM", "HIGH"],
+      enum: ["LOW", "MEDIUM", "HIGH", "URGENT"],
       default: "MEDIUM",
+    },
+    type: {
+      type: String,
+      enum: ["TASK", "BUG", "FEATURE", "IMPROVEMENT"],
+      default: "TASK",
+    },
+    dueDate: {
+      type: Date,
     },
     assignee: {
       type: mongoose.Schema.Types.ObjectId,
