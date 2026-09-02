@@ -25,7 +25,7 @@ export function usePostCreateWorkspace() {
       return response.data;
     },
     onSuccess: (data) => {
-      toast.success("Workspace Created");
+      toast.success(`Workspace Created workspace id:${data?._id}`);
     },
     onError: (error: any) => {
       const backendMessage = error.response?.data?.message || error.message;

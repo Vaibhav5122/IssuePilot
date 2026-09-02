@@ -1,9 +1,11 @@
 "use client";
 
+import Loading from "@/components/Loading";
 import { AddMember } from "@/components/members/addMember";
+import { DropdownMenuSubmenu } from "@/components/members/dropDown";
 import { Button } from "@/components/ui/button";
 import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers/useMembers";
-import { MoreVerticalIcon, UserPlusIcon, Users } from "lucide-react";
+import { UserPlusIcon, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -21,6 +23,16 @@ const members = () => {
     setIsOpen(true);
     document.body.style.overflow = "hidden";
   };
+  if (isPending) {
+    return <Loading />;
+  }
+  if (error) {
+    return (
+      <div className="text-red-500 flex items-center justify-center h-screen gap-2">
+        {error.message}
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-4 md:p-8 lg:p-10">
@@ -87,7 +99,8 @@ const members = () => {
                       <td> {data.createdAt}</td>
                       <td>
                         {" "}
-                        <MoreVerticalIcon />
+                        {/* Dropdown menu here */}
+                        <DropdownMenuSubmenu memberId={data?._id} />
                       </td>
                     </tr>
                   </tbody>

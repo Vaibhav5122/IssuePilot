@@ -1,5 +1,8 @@
 import { apiClient } from "@/lib/api/axios-client";
-import { AddWorkspaceMember } from "@/lib/validations/workspaceValidation";
+import {
+  AddWorkspaceMember,
+  AddWorkspaceMemberRole,
+} from "@/lib/validations/workspaceValidation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -24,8 +27,28 @@ export function usePostCreateMembers(memberId: string) {
       });
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Workspace Created");
+    },
+    onError: (error: any) => {
+      const backendMessage = error.response?.data?.message || error.message;
+      toast.error(backendMessage);
+    },
+  });
+}
+export function usePatchUpdateMembers(memberId: string) {
+  return useMutation({
+    mutationFn: async (value: AddWorkspaceMemberRole) => {
+      const response = await apiClient.patch(
+        `/workspaces/${memberId}/members/${memberId}`,
+        {
+          role: value.role,
+        },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Role Updated to ${data.role}`);
     },
     onError: (error: any) => {
       const backendMessage = error.response?.data?.message || error.message;
