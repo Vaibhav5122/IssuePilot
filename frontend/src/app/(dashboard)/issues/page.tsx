@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useActiveWorkspace } from "@/lib/hooks/useActiveWorkspace";
@@ -20,10 +20,13 @@ import {
   User,
   Loader2,
   ChevronDown,
+  Layers,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function IssuesPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialProjectId = searchParams.get("projectId");
 
   const { activeWorkspaceId, activeWorkspace } = useActiveWorkspace();
@@ -62,15 +65,52 @@ export default function IssuesPage() {
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
 
   const columns = [
-    { title: "TODO", key: "TODO", color: "border-l-blue-500", badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
-    { title: "IN PROGRESS", key: "IN_PROGRESS", color: "border-l-purple-500", badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
-    { title: "IN REVIEW", key: "IN_REVIEW", color: "border-l-amber-500", badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
-    { title: "DONE", key: "DONE", color: "border-l-emerald-500", badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
+    {
+      title: "TODO",
+      key: "TODO",
+      containerBg: "bg-blue-200/40 dark:bg-blue-950/30 border-blue-300/60 dark:border-blue-800/60",
+      badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    },
+    {
+      title: "IN PROGRESS",
+      key: "IN_PROGRESS",
+      containerBg: "bg-purple-200/40 dark:bg-purple-950/30 border-purple-300/60 dark:border-purple-800/60",
+      badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    },
+    {
+      title: "IN REVIEW",
+      key: "IN_REVIEW",
+      containerBg: "bg-amber-200/40 dark:bg-amber-950/30 border-amber-300/60 dark:border-amber-800/60",
+      badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    },
+    {
+      title: "DONE",
+      key: "DONE",
+      containerBg: "bg-emerald-200/40 dark:bg-emerald-950/30 border-emerald-300/60 dark:border-emerald-800/60",
+      badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    },
   ];
 
   const handleStatusDrop = (issueId: string, newStatus: string) => {
     updateIssue.mutate({ issueId, payload: { status: newStatus } });
   };
+
+  if (!activeWorkspaceId) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto my-12 text-center rounded-2xl border border-dashed border-border bg-card space-y-4">
+        <Layers className="mx-auto text-muted-foreground" size={40} />
+        <h2 className="text-xl font-bold text-foreground">No Workspace Selected</h2>
+        <p className="text-sm text-muted-foreground">
+          Please select a workspace from the Overview page to access project issues.
+        </p>
+        <Link href="/overview">
+          <Button className="rounded-xl bg-primary text-primary-foreground font-semibold">
+            Go to Workspaces Overview
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-6">
@@ -78,12 +118,12 @@ export default function IssuesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-            Issue Tracker
+            Issue Board
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage, filter, and track tasks for{" "}
+            Tracking issues for{" "}
             <span className="font-semibold text-foreground">
-              {activeWorkspace?.name || "your workspace"}
+              {activeWorkspace?.name || "your active workspace"}
             </span>
           </p>
         </div>
@@ -124,7 +164,7 @@ export default function IssuesPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Filter issues by key or title..."
+              placeholder="Filter issues by title..."
               className="pl-9 rounded-xl h-10"
             />
           </div>
@@ -198,15 +238,20 @@ export default function IssuesPage() {
           <span>Loading issues...</span>
         </div>
       ) : !selectedProjectId ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-          <FolderKanban className="mx-auto text-muted-foreground mb-3" size={32} />
-          <h3 className="text-base font-bold text-foreground">No projects in workspace</h3>
-          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center space-y-3">
+          <FolderKanban className="mx-auto text-muted-foreground" size={36} />
+          <h3 className="text-base font-bold text-foreground">No projects in this workspace</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
             Please create a project first before adding issues.
           </p>
+          <Link href="/projects">
+            <Button className="rounded-xl bg-primary text-primary-foreground text-xs font-semibold">
+              Go to Projects
+            </Button>
+          </Link>
         </div>
       ) : viewMode === "kanban" ? (
-        /* Kanban Board View */
+        /* Kanban Board View with Direct 200-300 Tint Column Backgrounds */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {columns.map((col) => {
             const colIssues = issues?.filter((i: any) => i.status === col.key) || [];
@@ -220,9 +265,9 @@ export default function IssuesPage() {
                   const issueId = e.dataTransfer.getData("text/plain");
                   if (issueId) handleStatusDrop(issueId, col.key);
                 }}
-                className={`rounded-2xl border border-border bg-card/60 p-4 ${col.color} border-l-4 min-h-[500px] flex flex-col`}
+                className={`rounded-2xl border p-4 ${col.containerBg} min-h-[500px] flex flex-col`}
               >
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-border">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-border/40">
                   <span className="text-xs font-bold text-foreground">{col.title}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${col.badge}`}>
                     {colIssues.length}

@@ -27,7 +27,7 @@ interface SidebarProps {
 const Sidebar = ({ isOpen }: SidebarProps) => {
   const { data: user } = useUser();
   const logout = useLogout();
-  const { activeWorkspace, workspaces, setActiveWorkspaceId } = useActiveWorkspace();
+  const { activeWorkspace, workspaces, setActiveWorkspaceId, activeWorkspaceId } = useActiveWorkspace();
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const userInitials = user?.name
@@ -82,11 +82,12 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
               {workspaces && workspaces.length > 0 ? (
                 workspaces.map((item: any) => {
                   const ws = item.workspace;
-                  const isSelected = ws._id === activeWorkspace?._id;
+                  const wsId = ws?.id || ws?._id;
+                  const isSelected = wsId === activeWorkspaceId;
                   return (
                     <DropdownMenuItem
-                      key={ws._id || ws.id}
-                      onClick={() => setActiveWorkspaceId(ws._id || ws.id)}
+                      key={wsId}
+                      onClick={() => setActiveWorkspaceId(wsId)}
                       className="flex items-center justify-between cursor-pointer"
                     >
                       <span className="truncate">{ws.name}</span>
@@ -113,10 +114,19 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
           <nav className="flex flex-col gap-1.5">
             <Overview />
             <Workspaces />
-            <Projects />
-            <Issues />
-            <Members />
             <Settings />
+
+            {/* Workspace-scoped nav — only shown when a workspace is active */}
+            {activeWorkspaceId && (
+              <>
+                <div className="mt-2 mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                  Workspace
+                </div>
+                <Projects />
+                <Issues />
+                <Members />
+              </>
+            )}
           </nav>
         </div>
 

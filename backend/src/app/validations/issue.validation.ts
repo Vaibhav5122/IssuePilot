@@ -2,41 +2,23 @@ import { z } from "zod";
 
 export const issueSchema = z.object({
   title: z
-    .string({
-      error: (issue) =>
-        issue === undefined ? "Issue name is required" : "Issue name not given",
-    })
+    .string()
     .trim()
-    .min(2, "Issue name should be atleast 2 char long")
-    .max(166, "Issue name too long"),
-  description: z
-    .string({ error: "Description have issue" })
-    .max(500, "Description too long")
-    .optional(),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"], {
-    error: (issue) =>
-      issue === undefined
-        ? "Issue priority does not match"
-        : "Invalid issue priority",
-  }),
+    .min(2, "Issue name should be at least 2 characters long")
+    .max(166, "Issue name is too long"),
+  description: z.string().max(500, "Description is too long").optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
+  status: z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"]).optional(),
+  assignee: z.string().nullable().optional(),
+  type: z.enum(["TASK", "BUG", "FEATURE", "IMPROVEMENT"]).optional(),
+  dueDate: z.string().optional(),
 });
 
 export const patchIssueSchema = issueSchema
-  .extend({
-    status: z
-      .enum(["TODO", "IN_PROGRESS", "DONE"], {
-        error: (issue) =>
-          issue === undefined
-            ? "Issue status does not match"
-            : "Invalid issue status",
-      })
-      .optional(),
-    assignee: z.string().nullable().optional(),
-  })
   .partial()
   .refine((data) => Object.values(data).some((value) => value !== undefined), {
     error:
-      "At least one field (title, description,priority, or status) must be provided for an update",
+      "At least one field (title, description, priority, status, assignee, type, or dueDate) must be provided for an update",
   });
 
 export type IssueSchema = z.infer<typeof issueSchema>;

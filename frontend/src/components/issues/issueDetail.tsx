@@ -23,6 +23,7 @@ import {
   useGetIssueActivity,
 } from "@/lib/hooks/useIssues";
 import { useGetComments, useCreateComment, useDeleteComment } from "@/lib/hooks/useComments";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers";
 import { useUser } from "@/lib/hooks/useAuth";
 
@@ -52,6 +53,7 @@ export function IssueDetailModal({
 
   const [commentText, setCommentText] = useState("");
   const [activeTab, setActiveTab] = useState<"comments" | "activity">("comments");
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   if (!issueId || !issue) return null;
 
@@ -64,17 +66,20 @@ export function IssueDetailModal({
   };
 
   const handleAssigneeChange = (newAssigneeId: string) => {
-    updateIssue.mutate({ issueId, payload: { assigneeId: newAssigneeId || undefined } });
+    updateIssue.mutate({ issueId, payload: { assignee: newAssigneeId || null } as any });
   };
 
   const handleDeleteIssue = () => {
-    if (confirm("Are you sure you want to delete this issue?")) {
-      deleteIssue.mutate(issueId, {
-        onSuccess: () => {
-          onClose();
-        },
-      });
-    }
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteIssue.mutate(issueId, {
+      onSuccess: () => {
+        setConfirmDeleteOpen(false);
+        onClose();
+      },
+    });
   };
 
   const handlePostComment = (e: React.FormEvent) => {
@@ -181,32 +186,39 @@ export function IssueDetailModal({
                   {/* List Comments */}
                   <div className="space-y-3 pt-2">
                     {comments && comments.length > 0 ? (
-                      comments.map((comment: any) => (
-                        <div
-                          key={comment._id}
-                          className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-1.5 text-xs"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-foreground">
-                              {comment.user?.name || "Member"}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] text-muted-foreground">
-                                {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      comments.map((comment: any) => {
+                        const authorName = comment.author?.name || comment.user?.name || "Member";
+                        const authorId = comment.author?._id || comment.author?.id || comment.author || comment.user?._id || comment.user?.id;
+                        const isMyComment = authorId && currentUser?._id && (authorId.toString() === currentUser._id.toString() || authorId.toString() === currentUser.id?.toString());
+
+                        return (
+                          <div
+                            key={comment._id || comment.id}
+                            className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-1.5 text-xs"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-foreground">
+                                {authorName}
                               </span>
-                              {(comment.user?._id === currentUser?._id || comment.user?.id === currentUser?._id) && (
-                                <button
-                                  onClick={() => deleteComment.mutate(comment._id)}
-                                  className="text-muted-foreground hover:text-red-500"
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              )}
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-muted-foreground">
+                                  {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                {isMyComment && (
+                                  <button
+                                    onClick={() => deleteComment.mutate(comment._id || comment.id)}
+                                    className="text-muted-foreground hover:text-red-500 cursor-pointer p-0.5 rounded transition-colors"
+                                    title="Delete comment"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                )}
+                              </div>
                             </div>
+                            <p className="text-foreground leading-normal">{comment.content}</p>
                           </div>
-                          <p className="text-foreground leading-normal">{comment.content}</p>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <p className="text-xs text-muted-foreground py-4 text-center">
                         No comments yet. Start the conversation!
@@ -217,21 +229,58 @@ export function IssueDetailModal({
               ) : (
                 <div className="space-y-3 pt-2">
                   {activities && activities.length > 0 ? (
-                    activities.map((act: any) => (
-                      <div
-                        key={act._id}
-                        className="p-3 rounded-xl border border-border bg-muted/10 text-xs flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} className="text-muted-foreground" />
-                          <span className="font-medium text-foreground">{act.user?.name || "System"}</span>
-                          <span className="text-muted-foreground">{act.action || act.details || "updated issue"}</span>
+                    activities.map((act: any) => {
+                      const actorName = act.actor?.name || act.user?.name || "System";
+                      
+                      const getActivityLabel = () => {
+                        if (act.action && typeof act.action === "string") return act.action;
+                        if (act.type === "STATUS_CHANGED") {
+                          const from = act.details?.from ? String(act.details.from).replace("_", " ") : "TODO";
+                          const to = act.details?.to ? String(act.details.to).replace("_", " ") : "status";
+                          return `changed status from ${from} to ${to}`;
+                        }
+                        if (act.type === "PRIORITY_CHANGED") {
+                          const from = act.details?.from || "NONE";
+                          const to = act.details?.to || "NONE";
+                          return `changed priority from ${from} to ${to}`;
+                        }
+                        if (act.type === "ASSIGNEE_CHANGED") {
+                          return act.details?.to ? "reassigned this issue" : "unassigned this issue";
+                        }
+                        if (act.type === "COMMENT_ADDED") {
+                          return "commented on this issue";
+                        }
+                        if (act.type === "ISSUE_CREATED") {
+                          return "created this issue";
+                        }
+                        if (typeof act.details === "string") {
+                          return act.details;
+                        }
+                        if (typeof act.details === "object" && act.details !== null) {
+                          if (act.details.from && act.details.to) {
+                            return `updated from ${String(act.details.from)} to ${String(act.details.to)}`;
+                          }
+                          return "updated this issue";
+                        }
+                        return "updated this issue";
+                      };
+
+                      return (
+                        <div
+                          key={act._id || act.id}
+                          className="p-3 rounded-xl border border-border bg-muted/10 text-xs flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Clock size={14} className="text-muted-foreground" />
+                            <span className="font-medium text-foreground">{actorName}</span>
+                            <span className="text-muted-foreground">{getActivityLabel()}</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(act.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground">
-                          {new Date(act.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <p className="text-xs text-muted-foreground py-4 text-center">
                       No activity logged yet.
@@ -275,7 +324,7 @@ export function IssueDetailModal({
             <div>
               <label className="text-xs font-semibold text-muted-foreground block mb-1.5">Assignee</label>
               <select
-                value={issue.assigneeId || issue.assignee?._id || ""}
+                value={typeof issue.assignee === "object" ? (issue.assignee?._id || issue.assignee?.id || "") : (issue.assignee || "")}
                 onChange={(e) => handleAssigneeChange(e.target.value)}
                 className="w-full h-9 rounded-lg border border-input bg-background px-2.5 text-xs font-medium text-foreground outline-none"
               >
@@ -299,6 +348,17 @@ export function IssueDetailModal({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmDeleteOpen}
+        onClose={() => setConfirmDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Issue"
+        description={`Are you sure you want to delete issue "${issue.title}"? This action cannot be undone.`}
+        confirmText="Delete Issue"
+        variant="destructive"
+        isLoading={deleteIssue.isPending}
+      />
     </div>
   );
 }

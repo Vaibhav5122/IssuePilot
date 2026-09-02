@@ -24,10 +24,20 @@ export async function expressApplication(): Promise<Application> {
   expressApp.use("/api/v1/issues/workspaces", issueRouter);
   expressApp.use("/api/v1/comments/workspaces", commentRouter);
 
+  expressApp.get("/", (req, res) => {
+    return res.status(200).json({
+      success: true,
+      message: "IssuePilot API is running",
+      version: "1.0.0",
+      health: "/health",
+      apiBase: "/api/v1",
+    });
+  });
+
   expressApp.get("/health", (req, res) => {
     return res
       .status(200)
-      .json({ success: true, message: "IssuePilot API is running" });
+      .json({ success: true, message: "IssuePilot API is healthy" });
   });
 
   //Unknown APi endpoints

@@ -17,6 +17,23 @@ export default function MembersPage() {
 
   const isAdmin = activeMemberRole === "ADMIN";
 
+  if (!activeWorkspaceId) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto my-12 text-center rounded-2xl border border-dashed border-border bg-card space-y-4">
+        <Users className="mx-auto text-muted-foreground" size={40} />
+        <h2 className="text-xl font-bold text-foreground">No Workspace Selected</h2>
+        <p className="text-sm text-muted-foreground">
+          Please select a workspace from the Overview page to view and manage members.
+        </p>
+        <a href="/overview">
+          <Button className="rounded-xl bg-primary text-primary-foreground font-semibold">
+            Go to Workspaces Overview
+          </Button>
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 md:p-8 lg:p-10 max-w-6xl mx-auto space-y-8">
       {/* Top Header & Action */}
@@ -75,7 +92,29 @@ export default function MembersPage() {
               <tbody className="divide-y divide-border">
                 {members && members.length > 0 ? (
                   members.map((member: any) => {
-                    const isSelf = member.user?._id === user?._id || member.user?.id === user?._id;
+                    const memberEmail =
+                      typeof member.user === "object" && member.user !== null
+                        ? member.user.email
+                        : member.email;
+                    const targetUserId =
+                      (typeof member.user === "object" && member.user !== null
+                        ? member.user._id || member.user.id
+                        : typeof member.user === "string"
+                        ? member.user
+                        : null) ||
+                      member.userId ||
+                      member._id;
+
+                    const isSelf = Boolean(
+                      (user?.email &&
+                        memberEmail &&
+                        user.email.toLowerCase() === memberEmail.toLowerCase()) ||
+                        (user?.id &&
+                          targetUserId &&
+                          (user.id === targetUserId ||
+                            user._id === targetUserId)),
+                    );
+
                     const joinDate = member.createdAt
                       ? new Date(member.createdAt).toLocaleDateString("en-US", {
                           month: "short",
@@ -121,12 +160,14 @@ export default function MembersPage() {
                           {joinDate}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          {isAdmin && activeWorkspaceId ? (
+                          {isSelf ? (
+                            <span className="text-xs text-muted-foreground font-medium italic">You</span>
+                          ) : isAdmin && activeWorkspaceId && targetUserId ? (
                             <DropdownMenuSubmenu
                               workspaceId={activeWorkspaceId}
-                              memberId={member._id}
+                              userId={targetUserId}
                               currentRole={member.role}
-                              isSelf={isSelf}
+                              isSelf={false}
                             />
                           ) : (
                             <span className="text-xs text-muted-foreground">—</span>

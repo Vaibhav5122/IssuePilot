@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function ProjectsPage() {
   const { activeWorkspaceId, activeWorkspace, activeMemberRole } = useActiveWorkspace();
@@ -24,6 +25,7 @@ export default function ProjectsPage() {
 
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const isAdmin = activeMemberRole === "ADMIN";
 
@@ -33,10 +35,32 @@ export default function ProjectsPage() {
   );
 
   const handleDelete = (projectId: string, projName: string) => {
-    if (confirm(`Are you sure you want to delete project "${projName}"?`)) {
-      deleteProject.mutate(projectId);
-    }
+    setProjectToDelete({ id: projectId, name: projName });
   };
+
+  const handleConfirmDelete = () => {
+    if (!projectToDelete) return;
+    deleteProject.mutate(projectToDelete.id, {
+      onSuccess: () => setProjectToDelete(null),
+    });
+  };
+
+  if (!activeWorkspaceId) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto my-12 text-center rounded-2xl border border-dashed border-border bg-card space-y-4">
+        <FolderKanban className="mx-auto text-muted-foreground" size={40} />
+        <h2 className="text-xl font-bold text-foreground">No Workspace Selected</h2>
+        <p className="text-sm text-muted-foreground">
+          Please select a workspace from the Overview page to view and create projects.
+        </p>
+        <Link href="/overview">
+          <Button className="rounded-xl bg-primary text-primary-foreground font-semibold">
+            Go to Workspaces Overview
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-8 lg:p-10 max-w-6xl mx-auto space-y-8">
@@ -156,6 +180,17 @@ export default function ProjectsPage() {
           onClose={() => setIsModalOpen(false)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!projectToDelete}
+        onClose={() => setProjectToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Project"
+        description={`Are you sure you want to delete project "${projectToDelete?.name}"? All associated issues and comments will be permanently deleted.`}
+        confirmText="Delete Project"
+        variant="destructive"
+        isLoading={deleteProject.isPending}
+      />
     </div>
   );
 }

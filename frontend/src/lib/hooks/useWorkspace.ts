@@ -11,6 +11,8 @@ export function useGetWorkspaces() {
       const response = await apiClient.get("/workspaces");
       return response.data.data;
     },
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 }
 
@@ -23,6 +25,8 @@ export function useGetWorkspaceById(workspaceId?: string | null) {
       return response.data.data;
     },
     enabled: !!workspaceId,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 30,
   });
 }
 
@@ -32,11 +36,15 @@ export function useCreateWorkspace() {
   return useMutation({
     mutationFn: async (payload: { name: string; description?: string }) => {
       const response = await apiClient.post("/workspaces/create", payload);
-      return response.data.data;
+      const resData = response.data?.data;
+      return resData?.data || resData || response.data;
     },
-    onSuccess: (newWorkspace) => {
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-      toast.success(`Workspace "${newWorkspace?.name || 'New Workspace'}" created!`);
+    onSuccess: async (data: any) => {
+      const ws = data?.workspace || data;
+      // Invalidate and immediately refetch fresh workspaces list
+      await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      await queryClient.refetchQueries({ queryKey: ["workspaces"] });
+      toast.success(`Workspace "${ws?.name || 'New Workspace'}" created!`);
     },
     onError: (error: any) => {
       const msg = error.response?.data?.message || "Failed to create workspace";

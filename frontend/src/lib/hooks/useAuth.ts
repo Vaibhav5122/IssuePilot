@@ -17,6 +17,7 @@ export function useUser() {
     },
     enabled: !!token,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
   });
 }
 
@@ -29,11 +30,17 @@ export function useLogin() {
       const response = await apiClient.post("/auth/login", values);
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data?.data?.token) {
         saveToken(data.data.token);
       }
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      // Invalidate and refetch fresh user profile and workspaces on login
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      await Promise.allSettled([
+        queryClient.refetchQueries({ queryKey: ["currentUser"] }),
+        queryClient.refetchQueries({ queryKey: ["workspaces"] }),
+      ]);
       toast.success("Welcome back! Signed in successfully.");
       router.push("/overview");
     },
@@ -70,6 +77,7 @@ export function useLogout() {
   return () => {
     removeToken();
     if (typeof window !== "undefined") {
+      localStorage.removeItem("issuepilot_active_workspace_id");
       localStorage.removeItem("activeWorkspaceId");
     }
     queryClient.clear();

@@ -26,7 +26,7 @@ export function useGetIssues(
       if (filters?.status) params.append("status", filters.status);
       if (filters?.priority) params.append("priority", filters.priority);
       if (filters?.type) params.append("type", filters.type);
-      if (filters?.assigneeId) params.append("assigneeId", filters.assigneeId);
+      if (filters?.assigneeId) params.append("assignee", filters.assigneeId);
 
       const queryString = params.toString() ? `?${params.toString()}` : "";
       const response = await apiClient.get(
@@ -35,6 +35,8 @@ export function useGetIssues(
       return response.data.data;
     },
     enabled: !!workspaceId && !!projectId,
+    staleTime: 1000 * 30, // 30 seconds fresh
+    gcTime: 1000 * 60 * 15, // 15 minutes cache
   });
 }
 
@@ -53,6 +55,8 @@ export function useGetIssueById(
       return response.data.data;
     },
     enabled: !!workspaceId && !!projectId && !!issueId,
+    staleTime: 1000 * 30,
+    gcTime: 1000 * 60 * 15,
   });
 }
 
@@ -70,17 +74,28 @@ export function useCreateIssue(
       priority?: string;
       type?: string;
       assigneeId?: string;
+      assignee?: string;
       dueDate?: string;
     }) => {
       if (!workspaceId || !projectId) throw new Error("Workspace and Project ID required");
+      const body = {
+        title: payload.title,
+        description: payload.description,
+        status: payload.status,
+        priority: payload.priority,
+        type: payload.type,
+        assignee: payload.assigneeId || payload.assignee || undefined,
+        dueDate: payload.dueDate,
+      };
       const response = await apiClient.post(
         `/issues/workspaces/${workspaceId}/projects/${projectId}/issues`,
-        payload
+        body
       );
       return response.data.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["issues", workspaceId, projectId] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["issues", workspaceId, projectId] });
+      await queryClient.refetchQueries({ queryKey: ["issues", workspaceId, projectId] });
       toast.success("Issue created successfully!");
     },
     onError: (error: any) => {
@@ -109,13 +124,19 @@ export function useUpdateIssue(
         priority: string;
         type: string;
         assigneeId: string;
+        assignee: string | null;
         dueDate: string;
       }>;
     }) => {
       if (!workspaceId || !projectId) throw new Error("Workspace and Project ID required");
+      const body: any = { ...payload };
+      if ("assigneeId" in payload) {
+        body.assignee = payload.assigneeId;
+        delete body.assigneeId;
+      }
       const response = await apiClient.patch(
         `/issues/workspaces/${workspaceId}/projects/${projectId}/issues/${issueId}`,
-        payload
+        body
       );
       return response.data.data;
     },

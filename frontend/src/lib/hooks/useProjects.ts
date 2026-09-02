@@ -13,6 +13,8 @@ export function useGetProjects(workspaceId?: string | null) {
       return response.data.data;
     },
     enabled: !!workspaceId,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 }
 
@@ -25,6 +27,8 @@ export function useGetProjectById(workspaceId?: string | null, projectId?: strin
       return response.data.data;
     },
     enabled: !!workspaceId && !!projectId,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 30,
   });
 }
 
@@ -37,8 +41,9 @@ export function useCreateProject(workspaceId?: string | null) {
       const response = await apiClient.post(`/projects/workspaces/${workspaceId}/projects`, payload);
       return response.data.data;
     },
-    onSuccess: (newProj) => {
-      queryClient.invalidateQueries({ queryKey: ["projects", workspaceId] });
+    onSuccess: async (newProj) => {
+      await queryClient.invalidateQueries({ queryKey: ["projects", workspaceId] });
+      await queryClient.refetchQueries({ queryKey: ["projects", workspaceId] });
       toast.success(`Project "${newProj?.name || 'New Project'}" created!`);
     },
     onError: (error: any) => {

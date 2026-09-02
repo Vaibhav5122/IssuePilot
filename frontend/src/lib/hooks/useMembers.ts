@@ -50,6 +50,7 @@ export function useUpdateMemberRole(workspaceId?: string | null) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["members", workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       toast.success("Member role updated");
     },
     onError: (error: any) => {
@@ -72,6 +73,7 @@ export function useRemoveWorkspaceMember(workspaceId?: string | null) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["members", workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       toast.success("Member removed from workspace");
     },
     onError: (error: any) => {
