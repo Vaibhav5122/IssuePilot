@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useLogin } from "@/lib/hooks/useAuth/useLogin";
+import { useLogin } from "@/lib/hooks/useAuth";
 import { LoginFormValues, loginSchema } from "@/lib/validations/authValidation";
 import { useRouter } from "next/navigation";
 
@@ -117,7 +117,7 @@ export function LoginForm({
           </Button> */}
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline underline-offset-4">
+            <Link href="/register" className="underline underline-offset-4">
               Sign up
             </Link>
           </FieldDescription>

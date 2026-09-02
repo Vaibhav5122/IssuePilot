@@ -1,7 +1,10 @@
 "use client";
+
 import { AuthGuard } from "@/components/auth/authGuard";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { Menu } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useActiveWorkspace } from "@/lib/hooks/useActiveWorkspace";
+import { Menu, Layers } from "lucide-react";
 import { useState } from "react";
 
 export default function DashboardLayout({
@@ -10,33 +13,48 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { activeWorkspace } = useActiveWorkspace();
+
   return (
     <AuthGuard>
-      <div>
-        <div className="flex min-h-screen w-full bg-[#f9fafb]">
-          {sidebarOpen && (
-            <div
-              onClick={() => setSidebarOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            />
-          )}
+      <div className="flex min-h-screen w-full bg-background text-foreground">
+        {sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
+          />
+        )}
 
-          <Sidebar isOpen={sidebarOpen} />
+        <Sidebar isOpen={sidebarOpen} />
 
-          <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-            <header className="flex h-14 items-center justify-between border-b bg-white px-4 lg:hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+          {/* Top Header Bar */}
+          <header className="flex h-14 items-center justify-between border-b border-border bg-card/50 backdrop-blur-xs px-4 lg:px-8">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="rounded-lg p-2 text-gray-600 hover:bg-gray-100"
+                className="rounded-lg p-2 text-muted-foreground hover:bg-accent lg:hidden cursor-pointer"
               >
-                <Menu size={22} />
+                <Menu size={20} />
               </button>
-              <span className="font-semibold text-gray-800">IssuePilot</span>
-              <div className="w-8" />
-            </header>
+              <div className="flex items-center gap-2">
+                <div className="hidden sm:flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary font-semibold text-xs">
+                  <Layers size={16} />
+                </div>
+                <span className="font-semibold text-sm text-foreground">
+                  {activeWorkspace?.name || "IssuePilot"}
+                </span>
+              </div>
+            </div>
 
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-y-auto">
             {children}
-          </div>
+          </main>
         </div>
       </div>
     </AuthGuard>

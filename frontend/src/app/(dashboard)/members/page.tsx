@@ -1,69 +1,160 @@
 "use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers/useMembers";
-import { MoreVerticalIcon, UserPlusIcon, Users } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useActiveWorkspace } from "@/lib/hooks/useActiveWorkspace";
+import { useGetWorkspaceMembers } from "@/lib/hooks/useMembers";
+import { useUser } from "@/lib/hooks/useAuth";
+import { DropdownMenuSubmenu } from "@/components/members/dropDown";
+import { AddMember } from "@/components/members/addMember";
+import { UserPlusIcon, Users, Shield, User, Loader2 } from "lucide-react";
 
 export default function MembersPage() {
-  // const params = useParams();
-  // const memberId = params?.memberId as string;
-  // console.log(memberId);
+  const { activeWorkspaceId, activeWorkspace, activeMemberRole } = useActiveWorkspace();
+  const { data: user } = useUser();
+  const { data: members, isLoading, error } = useGetWorkspaceMembers(activeWorkspaceId);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // const { data: members, error, isPending } = useGetWorkspaceMembers(memberId);
-  // console.log("tststtst", members);
-  // console.log(error);
+  const isAdmin = activeMemberRole === "ADMIN";
+
   return (
-    <div className="flex-1 p-4 md:p-8 lg:p-10">
-      <div className="mx-auto flex-col sm:flex-row max-w-6xl gap-8">
-        <div className="mx-auto flex-col sm:flex-row max-w-6xl gap-8 flex justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">
-              Members
-            </h1>
-            <p className="text-sm font-medium text-gray-500">
-              Manage workspace members and their access.
-            </p>
-          </div>
-          <Button className="bg-blue-600 hover:bg-blue-700 rounded-xl">
-            <UserPlusIcon /> Add Members
-          </Button>
-        </div>
-
-        <div className="mt-4 flex items-center justify-center sm:justify-start">
-          <p className="flex gap-2 items-center text-sm font-medium text-gray-500">
-            <Users size={20} /> 6 Members
+    <div className="p-4 md:p-8 lg:p-10 max-w-6xl mx-auto space-y-8">
+      {/* Top Header & Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+            Workspace Members
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage member access, roles, and invitations for{" "}
+            <span className="font-semibold text-foreground">
+              {activeWorkspace?.name || "your active workspace"}
+            </span>.
           </p>
         </div>
 
-        <div className="h-full flex items-center justify-start mt-5 w-full">
-          <table className="flex-col border rounded flex w-full items-center justify-center">
-            <thead className="w-full border-b p-4">
-              <tr className="justify-between sm:flex-row items-center flex">
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody className="flex-col border-b w-full p-4">
-              <tr className="justify-between items-center sm:flex-row flex-col gap-2 w-full flex flex-wrap overflow-x-clip">
-                <td>Vaibhav Waghmode</td>
-                <td>vwaghmode5757@gmail.com</td>
-                <td>
-                  <p className="px-3 py-0 rounded-sm font-bold bg-purple-300 text-purple-700 w-fit">
-                    Admin
-                  </p>
-                </td>
-                <td>May 12, 2024</td>
-                <td>
-                  <MoreVerticalIcon />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        {isAdmin && activeWorkspaceId && (
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="rounded-xl bg-primary text-primary-foreground font-medium flex items-center gap-2 shadow-xs"
+          >
+            <UserPlusIcon size={18} /> Add Member
+          </Button>
+        )}
       </div>
+
+      {/* Member Count Stats */}
+      <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+        <Users size={18} className="text-primary" />
+        <span>{members ? members.length : 0} Total Members</span>
+      </div>
+
+      {/* Members Table */}
+      {isLoading ? (
+        <div className="flex items-center justify-center p-12 text-muted-foreground gap-3">
+          <Loader2 className="animate-spin" size={20} />
+          <span>Loading workspace members...</span>
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-6 text-center text-destructive text-sm font-medium">
+          Failed to load workspace members. Please verify access permissions.
+        </div>
+      ) : (
+        <div className="w-full overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead className="border-b border-border bg-muted/40 text-xs font-semibold uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-6 py-4">User Name</th>
+                  <th className="px-6 py-4">Email</th>
+                  <th className="px-6 py-4">Role</th>
+                  <th className="px-6 py-4">Joined Date</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {members && members.length > 0 ? (
+                  members.map((member: any) => {
+                    const isSelf = member.user?._id === user?._id || member.user?.id === user?._id;
+                    const joinDate = member.createdAt
+                      ? new Date(member.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })
+                      : "—";
+
+                    return (
+                      <tr key={member._id} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">
+                              {member.user?.name?.[0]?.toUpperCase() || "U"}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-foreground flex items-center gap-1.5">
+                                {member.user?.name || "Unknown User"}
+                                {isSelf && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-muted text-muted-foreground">
+                                    You
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-muted-foreground">
+                          {member.user?.email || "—"}
+                        </td>
+                        <td className="px-6 py-4">
+                          {member.role === "ADMIN" ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                              <Shield size={12} /> Admin
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                              <User size={12} /> Member
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-xs text-muted-foreground">
+                          {joinDate}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {isAdmin && activeWorkspaceId ? (
+                            <DropdownMenuSubmenu
+                              workspaceId={activeWorkspaceId}
+                              memberId={member._id}
+                              currentRole={member.role}
+                              isSelf={isSelf}
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-sm">
+                      No members found in this workspace.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeWorkspaceId && (
+        <AddMember
+          workspaceId={activeWorkspaceId}
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1,66 +1,124 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { X } from "lucide-react";
-import { usePostCreateMembers } from "@/lib/hooks/useMembers/useMembers";
-import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { X, Mail, Shield } from "lucide-react";
+import { useAddWorkspaceMember } from "@/lib/hooks/useMembers";
+import { Input } from "@/components/ui/input";
 
-export const AddMember = ({ memberId, isOpen, onClose }: any) => {
+interface AddMemberProps {
+  workspaceId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const AddMember = ({ workspaceId, isOpen, onClose }: AddMemberProps) => {
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"ADMIN" | "MEMBER">("MEMBER");
+
+  const addMemberMutation = useAddWorkspaceMember(workspaceId);
+
   if (!isOpen) return null;
 
-  const [email, setEmail] = useState({ email: "" });
-
   const handleClose = () => {
+    setEmail("");
     onClose();
-    document.body.style.overflow = "";
   };
 
-  const { mutate: createWorkspace, isPending: Loading } =
-    usePostCreateMembers(memberId);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
 
-  const handleSubmit = () => {
-    createWorkspace(email, {
-      onSuccess: (data) => {
-        console.log("User added successfully", data);
-        handleClose();
-      },
-      onError: (error) => {
-        console.error("Failed to add user in workspace:", error);
-      },
-    });
+    addMemberMutation.mutate(
+      { userEmail: email.trim(), role },
+      {
+        onSuccess: () => {
+          handleClose();
+        },
+      }
+    );
   };
 
   return (
     <div
       onClick={handleClose}
-      className="p-8 fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm border border-gray-100 "
+        className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl"
       >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg mb-4">User Profile</h3>
-          <X cursor={"pointer"} onClick={handleClose} />
+        <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+          <div>
+            <h3 className="font-bold text-lg text-foreground">Invite Team Member</h3>
+            <p className="text-xs text-muted-foreground">Add a member to your workspace by email.</p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleClose} className="rounded-lg">
+            <X size={18} />
+          </Button>
         </div>
-        <input
-          name="email"
-          onChange={(e) =>
-            setEmail({ ...email, [e.target.name]: e.target.value })
-          }
-          defaultValue={email.email}
-          type="email"
-          placeholder="Enter user email to add..."
-          className="w-full border p-2 rounded-lg mb-4 outline-none"
-        />
 
-        <Button
-          onClick={handleSubmit}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg font-medium"
-        >
-          {Loading ? "Adding..." : "Add Members"}
-        </Button>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+              Member Email Address
+            </label>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3 top-3 text-muted-foreground" />
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="colleague@example.com"
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+              Role Permission
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole("MEMBER")}
+                className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer ${
+                  role === "MEMBER"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                Member
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("ADMIN")}
+                className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer ${
+                  role === "ADMIN"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                <Shield size={14} /> Admin
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={handleClose} className="rounded-xl">
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={addMemberMutation.isPending}
+              className="rounded-xl bg-primary text-primary-foreground font-medium"
+            >
+              {addMemberMutation.isPending ? "Inviting..." : "Send Invite"}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

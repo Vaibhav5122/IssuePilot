@@ -2,29 +2,22 @@
 
 import { FolderClosedIcon } from "lucide-react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const Projects = () => {
   const pathname = usePathname();
-  const params = useParams();
-  const memberId = params?.memberId as string | undefined;
-
-  const href = memberId ? `/workspaces/${memberId}/projects` : "/projects";
-  const isActive = pathname === "/projects" || pathname.startsWith("/projects");
+  const isActive = pathname.startsWith("/projects");
 
   return (
     <Link
-      href={href}
+      href="/projects"
       className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition ${
         isActive
-          ? "bg-[#1a2347] text-white shadow-sm"
-          : "text-gray-400 hover:bg-white/5 hover:text-white"
+          ? "bg-primary text-primary-foreground shadow-xs"
+          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       }`}
     >
-      <FolderClosedIcon
-        size={18}
-        className={isActive ? "text-indigo-400" : ""}
-      />
+      <FolderClosedIcon size={18} className={isActive ? "text-primary-foreground" : ""} />
       <span>Projects</span>
     </Link>
   );
