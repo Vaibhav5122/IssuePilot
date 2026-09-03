@@ -27,6 +27,29 @@ export default function Home() {
 
   useEffect(() => {
     setIsAuthenticated(!!getToken());
+
+    // Ping backend to wake up from Render cold sleep
+    const wakeUpBackend = async () => {
+      try {
+        const rawUrl =
+          process.env.NEXT_PUBLIC_API_BASE_URL ||
+          process.env.NEXT_PUBLIC_API_URL ||
+          "http://localhost:8000/api/v1";
+
+        const serverUrl = rawUrl.replace(/\/api\/v1\/?$/, "");
+
+        // Request /health with mode: 'no-cors' so browser won't log CORS errors
+        // and Render's routing proxy immediately triggers container spin-up.
+        await fetch(`${serverUrl}/health`, {
+          method: "GET",
+          mode: "no-cors",
+        });
+      } catch {
+        // Silently ignore errors during background warmup
+      }
+    };
+
+    wakeUpBackend();
   }, []);
 
   const routeLinks = [
@@ -35,7 +58,8 @@ export default function Home() {
       path: "/overview",
       icon: LayoutDashboard,
       color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      description: "High-level metrics, active projects, open vs completed issue counters.",
+      description:
+        "High-level metrics, active projects, open vs completed issue counters.",
       badge: "Protected",
     },
     {
@@ -43,7 +67,8 @@ export default function Home() {
       path: "/workspaces",
       icon: Layers,
       color: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
-      description: "Create, view, and switch workspaces with role-based member permissions.",
+      description:
+        "Create, view, and switch workspaces with role-based member permissions.",
       badge: "Protected",
     },
     {
@@ -51,7 +76,8 @@ export default function Home() {
       path: "/projects",
       icon: FolderKanban,
       color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-      description: "Organize tasks into projects, track progress, key identifiers, and descriptions.",
+      description:
+        "Organize tasks into projects, track progress, key identifiers, and descriptions.",
       badge: "Protected",
     },
     {
@@ -59,7 +85,8 @@ export default function Home() {
       path: "/issues",
       icon: Kanban,
       color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-      description: "Full-featured issue board with status columns, priority filters, and search.",
+      description:
+        "Full-featured issue board with status columns, priority filters, and search.",
       badge: "Protected",
     },
     {
@@ -67,7 +94,8 @@ export default function Home() {
       path: "/members",
       icon: Users,
       color: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
-      description: "Invite workspace members, assign Admin/Member roles, and align permissions.",
+      description:
+        "Invite workspace members, assign Admin/Member roles, and align permissions.",
       badge: "Protected",
     },
     {
@@ -75,7 +103,8 @@ export default function Home() {
       path: "/settings",
       icon: Settings,
       color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-      description: "Manage personal profile details, dark mode preferences, and workspace config.",
+      description:
+        "Manage personal profile details, dark mode preferences, and workspace config.",
       badge: "Protected",
     },
   ];
@@ -95,13 +124,22 @@ export default function Home() {
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">
+            <a
+              href="#features"
+              className="hover:text-foreground transition-colors"
+            >
               Features
             </a>
-            <a href="#routes" className="hover:text-foreground transition-colors">
+            <a
+              href="#routes"
+              className="hover:text-foreground transition-colors"
+            >
               Page Directory
             </a>
-            <a href="#architecture" className="hover:text-foreground transition-colors">
+            <a
+              href="#architecture"
+              className="hover:text-foreground transition-colors"
+            >
               Architecture
             </a>
           </nav>
@@ -137,10 +175,11 @@ export default function Home() {
         <section className="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24 border-b border-border/30">
           <div className="absolute inset-0 bg-radial from-primary/5 via-transparent to-transparent -z-10" />
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-            
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold mb-6">
               <Sparkles size={14} />
-              <span>IssuePilot 2.0 • Modern Agile Issue & Project Management</span>
+              <span>
+                IssuePilot 2.0 • Modern Agile Issue & Project Management
+              </span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground max-w-4xl leading-[1.15]">
@@ -151,19 +190,30 @@ export default function Home() {
             </h1>
 
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-              An end-to-end workspace management tool built for modern teams. Organize workspaces, 
-              assign granular roles, manage projects, drag-and-drop Kanban issues, and track audit history in real-time.
+              An end-to-end workspace management tool built for modern teams.
+              Organize workspaces, assign granular roles, manage projects,
+              drag-and-drop Kanban issues, and track audit history in real-time.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center w-full sm:w-auto">
-              <Link href={isAuthenticated ? "/overview" : "/register"} className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto rounded-xl px-8 font-semibold text-base shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+              <Link
+                href={isAuthenticated ? "/overview" : "/register"}
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto rounded-xl px-8 font-semibold text-base shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                >
                   {isAuthenticated ? "Open Dashboard" : "Get Started for Free"}
                   <ArrowRight size={18} />
                 </Button>
               </Link>
               <a href="#routes" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-xl px-8 font-semibold text-base border-border">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto rounded-xl px-8 font-semibold text-base border-border"
+                >
                   Explore App Pages
                 </Button>
               </a>
@@ -176,30 +226,47 @@ export default function Home() {
                   <div className="w-3 h-3 rounded-full bg-red-500/80" />
                   <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                  <span className="ml-2 text-xs font-mono text-muted-foreground">issuepilot.app/issues</span>
+                  <span className="ml-2 text-xs font-mono text-muted-foreground">
+                    issuepilot.app/issues
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="px-2 py-0.5 rounded bg-muted">Workspace: Acme Corp</span>
+                  <span className="px-2 py-0.5 rounded bg-muted">
+                    Workspace: IssuePilot Corp
+                  </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-left">
                 {[
                   { title: "TODO", count: 4, color: "border-l-blue-500" },
-                  { title: "IN PROGRESS", count: 6, color: "border-l-purple-500" },
+                  {
+                    title: "IN PROGRESS",
+                    count: 6,
+                    color: "border-l-purple-500",
+                  },
                   { title: "IN REVIEW", count: 2, color: "border-l-amber-500" },
                   { title: "DONE", count: 12, color: "border-l-emerald-500" },
                 ].map((col) => (
-                  <div key={col.title} className={`rounded-xl border border-border bg-background p-3 ${col.color} border-l-4`}>
+                  <div
+                    key={col.title}
+                    className={`rounded-xl border border-border bg-background p-3 ${col.color} border-l-4`}
+                  >
                     <div className="flex justify-between items-center text-xs font-bold text-muted-foreground mb-2">
                       <span>{col.title}</span>
-                      <span className="px-1.5 py-0.5 rounded-full bg-muted">{col.count}</span>
+                      <span className="px-1.5 py-0.5 rounded-full bg-muted">
+                        {col.count}
+                      </span>
                     </div>
                     <div className="space-y-2">
                       <div className="p-2.5 rounded-lg border border-border bg-card shadow-xs text-xs space-y-1">
-                        <div className="font-semibold text-foreground">Fix Table Alignment in Members UI</div>
+                        <div className="font-semibold text-foreground">
+                          Fix Table Alignment in Members UI
+                        </div>
                         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                          <span className="px-1.5 py-0.2 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-bold">HIGH</span>
+                          <span className="px-1.5 py-0.2 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-bold">
+                            HIGH
+                          </span>
                           <span>IP-104</span>
                         </div>
                       </div>
@@ -208,18 +275,21 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
           </div>
         </section>
 
         {/* Page Directory / Links Section */}
-        <section id="routes" className="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section
+          id="routes"
+          className="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        >
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-3xl font-bold text-foreground tracking-tight">
               Complete Application Page Directory
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Explore all routes and views engineered into IssuePilot, powered by REST API endpoints.
+              Explore all routes and views engineered into IssuePilot, powered
+              by REST API endpoints.
             </p>
           </div>
 
@@ -254,7 +324,11 @@ export default function Home() {
                       {route.path}
                     </span>
                     <Link href={route.path}>
-                      <Button size="sm" variant="ghost" className="gap-1 text-xs font-semibold group-hover:translate-x-1 transition-transform">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1 text-xs font-semibold group-hover:translate-x-1 transition-transform"
+                      >
                         Navigate <ChevronRight size={14} />
                       </Button>
                     </Link>
@@ -266,14 +340,18 @@ export default function Home() {
         </section>
 
         {/* Core Features */}
-        <section id="features" className="py-16 md:py-24 border-t border-border/40 bg-muted/20">
+        <section
+          id="features"
+          className="py-16 md:py-24 border-t border-border/40 bg-muted/20"
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl font-bold text-foreground tracking-tight">
                 Built for High-Velocity Software Teams
               </h2>
               <p className="mt-3 text-muted-foreground">
-                Everything you need to plan, track, and ship high quality software.
+                Everything you need to plan, track, and ship high quality
+                software.
               </p>
             </div>
 
@@ -282,9 +360,12 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
                   <ShieldCheck size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Multi-Tenant & RBAC</h3>
+                <h3 className="text-xl font-bold text-foreground">
+                  Multi-Tenant & RBAC
+                </h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Isolate work across multiple workspaces. Grant Admin or Member permissions to keep your data secure.
+                  Isolate work across multiple workspaces. Grant Admin or Member
+                  permissions to keep your data secure.
                 </p>
               </div>
 
@@ -292,9 +373,12 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4">
                   <Zap size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Kanban & Filtering</h3>
+                <h3 className="text-xl font-bold text-foreground">
+                  Kanban & Filtering
+                </h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Seamlessly organize tasks into TODO, IN PROGRESS, IN REVIEW, and DONE. Filter by priority, assignee, or keyword.
+                  Seamlessly organize tasks into TODO, IN PROGRESS, IN REVIEW,
+                  and DONE. Filter by priority, assignee, or keyword.
                 </p>
               </div>
 
@@ -302,9 +386,12 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
                   <MessageSquare size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Activity & Comments</h3>
+                <h3 className="text-xl font-bold text-foreground">
+                  Activity & Comments
+                </h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Track full audit histories of status and priority updates alongside threaded discussions for every issue.
+                  Track full audit histories of status and priority updates
+                  alongside threaded discussions for every issue.
                 </p>
               </div>
             </div>
@@ -320,12 +407,20 @@ export default function Home() {
               IP
             </div>
             <span className="font-semibold text-foreground">IssuePilot</span>
-            <span>© {new Date().getFullYear()} IssuePilot. All rights reserved.</span>
+            <span>
+              © {new Date().getFullYear()} IssuePilot. All rights reserved.
+            </span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/login" className="hover:text-foreground">Sign In</Link>
-            <Link href="/register" className="hover:text-foreground">Register</Link>
-            <Link href="/overview" className="hover:text-foreground">Dashboard</Link>
+            <Link href="/login" className="hover:text-foreground">
+              Sign In
+            </Link>
+            <Link href="/register" className="hover:text-foreground">
+              Register
+            </Link>
+            <Link href="/overview" className="hover:text-foreground">
+              Dashboard
+            </Link>
           </div>
         </div>
       </footer>
