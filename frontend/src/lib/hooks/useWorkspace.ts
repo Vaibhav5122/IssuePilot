@@ -2,15 +2,20 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/axios-client";
+import { getToken } from "@/lib/auth/token";
 import { toast } from "sonner";
 
 export function useGetWorkspaces() {
+  const token = typeof window !== "undefined" ? getToken() : null;
+
   return useQuery({
     queryKey: ["workspaces"],
     queryFn: async () => {
+      if (!token) return [];
       const response = await apiClient.get("/workspaces");
       return response.data.data;
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 2, // 2 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
   });

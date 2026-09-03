@@ -23,10 +23,13 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response.status === 401) {
+    if (error?.response?.status === 401) {
       if (typeof window !== "undefined") {
         removeToken();
-        if (!window.location.pathname.startsWith("/login")) {
+        const currentPath = window.location.pathname;
+        const publicPaths = ["/", "/login", "/register"];
+        const isPublic = publicPaths.includes(currentPath) || currentPath.startsWith("/login") || currentPath.startsWith("/register");
+        if (!isPublic) {
           window.location.href = "/login";
         }
       }
