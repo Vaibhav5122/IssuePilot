@@ -58,6 +58,12 @@ export async function expressApplication(): Promise<Application> {
       .json({ success: true, message: "IssuePilot API is healthy" });
   });
 
+  expressApp.get("/api/v1/health", (req, res) => {
+    return res
+      .status(200)
+      .json({ success: true, message: "IssuePilot API is healthy" });
+  });
+
   //Unknown APi endpoints
 
   expressApp.use((req, _res, next) => {
