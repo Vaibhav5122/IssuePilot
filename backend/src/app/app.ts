@@ -15,7 +15,25 @@ export async function expressApplication(): Promise<Application> {
 
   await connectDB();
 
-  expressApp.use(cors());
+  const allowedOrigins = ["http://localhost:5173", process.env.FRONTEND_URL];
+
+  expressApp.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),
+  );
+
   expressApp.use(express.json());
   expressApp.use(authenticationMiddleware());
   expressApp.use("/api/v1/auth", userRouter);
