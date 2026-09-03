@@ -4,6 +4,29 @@
 
 ---
 
+## 📸 Visual Showcase & Tour
+
+> [!TIP]
+> **Quick Test Login**: Try the live deployment with email `alex.mercer@issuepilot.dev` and password `Password@123`.
+
+| 🚀 Modern Landing Page | 🏢 Multi-Tenant Workspaces Overview |
+| :---: | :---: |
+| ![Landing Page](frontend/public/resources/01_Home.png) | ![Workspaces Overview](frontend/public/resources/02_Overview.png) |
+
+| 📁 Project Directory & Progress | 📋 Interactive Kanban Board & Swimlanes |
+| :---: | :---: |
+| ![Project Directory](frontend/public/resources/03_Projects.png) | ![Kanban Board](frontend/public/resources/04_IssueBoard.png) |
+
+| 🔍 Detailed Issue Drawer & Discussion | ⚡ Chronological Activity Audit Trail |
+| :---: | :---: |
+| ![Issue Overview & Comments](frontend/public/resources/05_IssueOverview.png) | ![Activity History](frontend/public/resources/06_activityHistory.png) |
+
+| 👥 Team Collaboration & RBAC (Admin / Member Permissions) |
+| :---: |
+| ![Workspace Members & Roles](frontend/public/resources/07_WorkspaceMembers.png) |
+
+---
+
 ## 🏗 Architecture Overview
 
 The repository is organized as a clean two-tier full-stack application:
@@ -19,6 +42,8 @@ IssuePilot/
 │   └── package.json
 │
 ├── frontend/           # Next.js 16 + React 19 + Tailwind CSS v4 Client
+│   ├── public/
+│   │   └── resources/  # Application screenshots & architecture diagrams
 │   ├── src/
 │   │   ├── app/        # App Router pages (auth, dashboard, landing)
 │   │   ├── components/ # UI components, Kanban board, modals, and sidebar
@@ -29,26 +54,9 @@ IssuePilot/
 └── README.md           # Root Project Documentation
 ```
 
-### System Architecture
+### System Architecture Diagram
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                   Frontend (Next.js 16)                  │
-│  React 19 • Tailwind CSS v4 • TanStack Query • Next-Themes│
-└────────────────────────────┬─────────────────────────────┘
-                             │ HTTP / JSON (Axios + JWT)
-                             ▼
-┌──────────────────────────────────────────────────────────┐
-│                   Backend (Express 5)                    │
-│  Node.js • TypeScript • Zod Validations • JWT Middleware │
-└────────────────────────────┬─────────────────────────────┘
-                             │ Mongoose ODM
-                             ▼
-┌──────────────────────────────────────────────────────────┐
-│                    Database (MongoDB)                    │
-│  Workspaces • WorkspaceMembers • Projects • Issues • etc.│
-└──────────────────────────────────────────────────────────┘
-```
+![IssuePilot System Architecture Diagram](frontend/public/resources/system_architecture.jpg)
 
 ---
 

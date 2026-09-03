@@ -72,10 +72,24 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!exists) {
-        // Workspace was deleted or user was removed
-        setActiveWorkspaceIdState(null);
+        // Workspace was deleted or user was removed - fallback to first workspace
+        const firstId = workspaces[0]?.workspace?._id || workspaces[0]?.workspace?.id || null;
+        setActiveWorkspaceIdState(firstId);
         if (typeof window !== "undefined") {
-          localStorage.removeItem(STORAGE_KEY);
+          if (firstId) {
+            localStorage.setItem(STORAGE_KEY, firstId);
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        }
+      }
+    } else {
+      // If no active workspace is selected yet, automatically select the first one
+      const firstId = workspaces[0]?.workspace?._id || workspaces[0]?.workspace?.id || null;
+      if (firstId) {
+        setActiveWorkspaceIdState(firstId);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(STORAGE_KEY, firstId);
         }
       }
     }

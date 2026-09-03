@@ -141,3 +141,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Seed data and test credentials (sensitive)
+*seed-credentials.json
+*seed-data.json
+seed-credentials.json
+seed-data.json

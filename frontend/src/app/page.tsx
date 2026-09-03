@@ -38,14 +38,18 @@ export default function Home() {
 
         const serverUrl = rawUrl.replace(/\/api\/v1\/?$/, "");
 
+        console.log("⚡ [IssuePilot] Calling backend to wake up from sleep:", `${serverUrl}/health`);
+
         // Request /health with mode: 'no-cors' so browser won't log CORS errors
         // and Render's routing proxy immediately triggers container spin-up.
         await fetch(`${serverUrl}/health`, {
           method: "GET",
           mode: "no-cors",
         });
-      } catch {
-        // Silently ignore errors during background warmup
+
+        console.log("✅ [IssuePilot] Backend wakeup ping successfully dispatched to:", serverUrl);
+      } catch (err) {
+        console.warn("⚠️ [IssuePilot] Backend wakeup ping warning:", err);
       }
     };
 

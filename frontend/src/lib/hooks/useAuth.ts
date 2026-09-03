@@ -42,7 +42,7 @@ export function useLogin() {
         queryClient.refetchQueries({ queryKey: ["workspaces"] }),
       ]);
       toast.success("Welcome back! Signed in successfully.");
-      router.push("/overview");
+      window.location.href = "/overview";
     },
     onError: (error: any) => {
       const msg = error.response?.data?.message || "Invalid credentials";

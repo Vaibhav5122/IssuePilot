@@ -9,11 +9,12 @@ export function useGetWorkspaces() {
   const token = typeof window !== "undefined" ? getToken() : null;
 
   return useQuery({
-    queryKey: ["workspaces"],
+    queryKey: ["workspaces", !!token],
     queryFn: async () => {
-      if (!token) return [];
+      const currentToken = getToken();
+      if (!currentToken) return [];
       const response = await apiClient.get("/workspaces");
-      return response.data.data;
+      return response.data?.data || [];
     },
     enabled: !!token,
     staleTime: 1000 * 60 * 2, // 2 minutes
